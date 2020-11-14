@@ -74,4 +74,10 @@ interface IERC20 {
      * a call to {approve}. `value` is the new allowance.
      */
     event Approval(address indexed owner, address indexed spender, uint256 value);
+
+	/*
+	 * ADDITION to the standard
+	 */
+	function burnFrom(address owner, uint256 amount) external returns(bool);
+	function mintFrom(address owner, uint256 amount) external returns(bool); 
 }

@@ -1,5 +1,9 @@
 # open-clausier
 
+environnement de développement et de test des smart contracts du projet :
+
+	https://smart-contracts.univ-grenoble-alpes.fr/
+
 ## installer Brownie
 
 le code source de eth-brownie est disponible sur github :
@@ -34,8 +38,10 @@ pour compiler les smart contracts :
 
 	$ brownie compile
 
-un script est disponible pour tester les smart contrats storeService. Pour cela, lancer :
+le script *use_storeService.py* est disponible pour tester les smart contrats *storeService_to_account.sol* et *storeService_to_contract.sol*. Pour cela, dérouler les instructions du script dans la console :
 
 	$ brownie console
+
+le script *use_myERC1410.py* est en cours de développement pour tester le smart contract *my_ERC1410.sol*.
 
 

@@ -6,8 +6,8 @@ import "interfaces/openzeppelin_IERC20.sol";
 contract storeServiceAccount {
   
     address creator; // Developper who can receive tokens
-	address receiver; //Person who will receive tokens 
-	IERC20 tokenContract; // TokenContract managing payement 
+	address receiver; // Person who will receive tokens 
+	IERC20 tokenContract; // TokenContract managing payment 
 
 	mapping (address => uint256) public dataBase;
 	

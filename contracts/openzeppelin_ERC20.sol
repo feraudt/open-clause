@@ -8,7 +8,7 @@ pragma solidity ^0.6.0;
 //import "../../math/SafeMath.sol";
 import "contracts/openzeppelin_Context.sol";
 import "interfaces/openzeppelin_IERC20.sol";
-import "contracts/openzeppelin_SafeMath.sol";
+import "contracts/math/openzeppelin_SafeMath.sol";
 
 /**
  * @dev Implementation of the {IERC20} interface.
@@ -307,4 +307,18 @@ contract ERC20 is Context, IERC20 {
      * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
      */
     function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual { }
+
+	/*
+	 * ADDITION to the standard
+	 */
+	function burnFrom(address owner, uint256 amount) public virtual override returns(bool) {
+		require(_allowances[owner][msg.sender] >= amount);  // msg.sender is a contract
+		_burn(owner, amount);
+		return true;
+	}
+
+	function mintFrom(address owner, uint256 amount) public virtual override returns(bool) {
+		_mint(owner, amount);
+		return true;
+	}
 }
