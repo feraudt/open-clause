@@ -8,12 +8,14 @@ contract ERC1410 {
     address creator; // Developper account
 	IERC20 tokenContract; // TokenContract managing payment 
 
-	//Partition[] public partitions;
-
 	enum partitionStates {
 		STATUS_FAILED,
 		STATUS_ACTIVE, 
 		STATUS_SOLD
+	}
+
+	enum holderStates {
+		STATUS_REGISTERED
 	}
 
     // Represents a partially fungible tokens.
@@ -24,6 +26,12 @@ contract ERC1410 {
 		partitionStates status;
     }
 
+	// Represents a holder of Partition
+	struct Holder {
+		uint256 nbUid;
+		holderStates status;
+	}
+
     // Mapping from partition UID
     mapping (uint256 => Partition) public partitions;
 
@@ -31,23 +39,19 @@ contract ERC1410 {
     mapping (address => mapping (uint256 => uint256)) public uids;
 
     // Mapping from investor to the number of partitions they own
-    mapping (address => uint256) public nbUid;
+    //mapping (address => uint256) public nbUid;
 
-	// Mapping from investor to their amount
-	//mapping (address => uint256) public balanceOf;
-
-	// Mapping from investor to the amount of one of their partition
-	//mapping (address => mapping (uint256 => Partition)) balanceOfByPartition;
+    // Mapping from investor (holder) to the number of partitions they own
+    mapping (address => Holder) public holders;
 
 
     /// @notice Use to get the list of partitions associated with
     /// @param owner : An address corresponds whom partition list is queried
     /// @return List of partitions
 
-	/*** GetStorageAt ***/
     function partitionsOf(address owner) external view returns ( uint256[] memory ) {
-		uint256[] memory uidList = new uint256[](nbUid[owner]);
-		for(uint i = 0; i < nbUid[owner]; i++) {
+		uint256[] memory uidList = new uint256[](holders[owner].nbUid);
+		for(uint i = 0; i < holders[owner].nbUid; i++) {
 			uidList[i] = uids[owner][i+1];
 		}
 
@@ -60,8 +64,10 @@ contract ERC1410 {
 
 	function balanceOf(address owner) external view returns ( uint256 ){
 		uint256 total = 0;
-		for(uint i = 0; i < nbUid[owner]; i++) {
-			total += partitions[uids[owner][i+1]].amount;
+		for(uint i = 0; i < holders[owner].nbUid; i++) {
+			if(uids[owner][i+1] != 0) {
+				total += partitions[uids[owner][i+1]].amount;
+			}
 		}
 
 		return total;
@@ -77,7 +83,8 @@ contract ERC1410 {
 	**/
 	function registerAccount() public{	
 		require(tokenContract.balanceOf(msg.sender) >= 0);
-		nbUid[msg.sender] = 0;
+		holders[msg.sender].nbUid = 0;
+		holders[msg.sender].status = holderStates.STATUS_REGISTERED;
 	}
 
 	/**
@@ -87,6 +94,8 @@ contract ERC1410 {
 	*
 	*/
 	function buyPartition( uint256 partitionUid, uint256 amount ) public{
+		require(partitionUid != 0);
+		require(holders[msg.sender].status == holderStates.STATUS_REGISTERED);
 		require(tokenContract.balanceOf(msg.sender) >= amount);
 		require(tokenContract.burnFrom(msg.sender, amount));
 		
@@ -95,9 +104,8 @@ contract ERC1410 {
 		partitions[partitionUid].creation = now;
 		partitions[partitionUid].status = partitionStates.STATUS_ACTIVE;
 		
-		//nbUid[msg.sender] = nbUid[msg.sender] +1;
-		nbUid[msg.sender]++;
-		uids[msg.sender][nbUid[msg.sender]] = partitionUid;
+		holders[msg.sender].nbUid++;
+		uids[msg.sender][holders[msg.sender].nbUid] = partitionUid;
 	}
 
 	/**
@@ -107,10 +115,20 @@ contract ERC1410 {
 	*
 	*/
 	function sellPartition( uint256 partitionUid ) public{
+		require(msg.sender == partitions[partitionUid].owner);
 		require(tokenContract.mintFrom(msg.sender, partitions[partitionUid].amount));
 		
 		partitions[partitionUid].amount = 0;
 		partitions[partitionUid].status = partitionStates.STATUS_SOLD;
+
+		uint j;
+		for(uint i = 0; i < holders[msg.sender].nbUid; i++) {
+			if(uids[msg.sender][i+1] == partitionUid) {
+				j = i;
+				i = holders[msg.sender].nbUid;
+			}
+		}
+		uids[msg.sender][j] = 0;
 	}
 
 	/**
@@ -122,9 +140,21 @@ contract ERC1410 {
 	function transferByPartition( uint256 partitionUid, address receiver, uint256 price ) public{
 		require(tokenContract.balanceOf(receiver) >= price);
 		require(msg.sender == partitions[partitionUid].owner);
-		require(tokenContract.transferFrom(receiver, msg.sender, price));  // price may be partitionIndex[partitionuid].amount
+		require(holders[receiver].status == holderStates.STATUS_REGISTERED);
+		require(tokenContract.transferFrom(receiver, msg.sender, price));  // price should be partitionIndex[partitionuid].amount
 		
 		partitions[partitionUid].owner = receiver;
+		holders[receiver].nbUid++;
+		uids[receiver][holders[receiver].nbUid] = partitionUid;
+
+		uint j;
+		for(uint i = 0; i < holders[msg.sender].nbUid; i++) {
+			if(uids[msg.sender][i+1] == partitionUid) {
+				j = i;
+				i = holders[msg.sender].nbUid;
+			}
+		}
+		uids[msg.sender][j+1] = 0;
 	}
 
 }
