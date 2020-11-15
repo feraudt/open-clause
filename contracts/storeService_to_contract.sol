@@ -1,6 +1,6 @@
 pragma solidity ^0.6.0;
 
-import "interfaces/openzeppelin_IERC20.sol";
+import "interfaces/my_IERC20.sol";
 
 
 contract storeServiceContract {

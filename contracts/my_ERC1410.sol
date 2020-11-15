@@ -1,7 +1,7 @@
 pragma solidity ^0.6.0;
 
-//import "contracts/SecurityTokenStandard_ERC1410Basic.sol";
-import "interfaces/openzeppelin_IERC20.sol";
+//import "contracts/my_ERC1410.sol";
+import "interfaces/my_IERC20.sol";
 
 contract ERC1410 {
 
