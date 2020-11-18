@@ -75,9 +75,10 @@ interface IERC20 {
      */
     event Approval(address indexed owner, address indexed spender, uint256 value);
 
-	/*
+	/* ------------------------
 	 * ADDITION to the standard
-	 */
+	 --------------------------*/
+
     function burnFrom(address owner, uint256 amount) external returns(bool);
     function mintFrom(address owner, uint256 amount) external returns(bool); 
 }

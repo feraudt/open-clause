@@ -304,9 +304,9 @@ contract ERC20 is Context, IERC20 {
      */
     function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual { }
 
-	/*
+	/*-------------------------
 	 * ADDITION to the standard
-	 */
+	 --------------------------*/
 	function burnFrom(address owner, uint256 amount) public virtual override returns(bool) {
 		require(_allowances[owner][msg.sender] >= amount);  // msg.sender is a contract
 		_burn(owner, amount);

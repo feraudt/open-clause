@@ -1,21 +1,21 @@
 pragma solidity ^0.6.0;
 
-//import "contracts/my_ERC1410.sol";
 import "interfaces/my_IERC20.sol";
 
 contract ERC1410 {
 
     address creator; // Developper account
+	bool isControl;
 	IERC20 tokenContract; // TokenContract managing payment 
 
 	enum partitionStates {
-		STATUS_FAILED,
 		STATUS_ACTIVE, 
 		STATUS_SOLD
 	}
 
 	enum holderStates {
-		STATUS_REGISTERED
+		STATUS_HOLDER,
+		STATUS_CONTROLLER
 	}
 
     // Represents a partially fungible tokens.
@@ -45,6 +45,17 @@ contract ERC1410 {
     mapping (address => Holder) public holders;
 
 
+	constructor(address _tokenContractAddress, bool _isControl) public {
+	    creator = msg.sender;
+		isControl = _isControl;
+		tokenContract = IERC20(_tokenContractAddress);
+	}
+
+
+	//------------------------------------------------------------
+	// specifications ERC1410 - Partially Fungible Token functions
+	//------------------------------------------------------------
+
     /// @notice Use to get the list of partitions associated with
     /// @param owner : An address corresponds whom partition list is queried
     /// @return List of partitions
@@ -73,18 +84,13 @@ contract ERC1410 {
 		return total;
 	}
 
-	constructor(address _tokenContractAddress) public {
-	    creator = msg.sender;
-		tokenContract = IERC20(_tokenContractAddress);
-	}
-
 	/**
 	* Register an account
 	**/
 	function registerAccount() public{	
 		require(tokenContract.balanceOf(msg.sender) >= 0);
 		holders[msg.sender].nbUid = 0;
-		holders[msg.sender].status = holderStates.STATUS_REGISTERED;
+		holders[msg.sender].status = holderStates.STATUS_HOLDER;
 	}
 
 	/**
@@ -95,7 +101,7 @@ contract ERC1410 {
 	*/
 	function buyPartition( uint256 partitionUid, uint256 amount ) public{
 		require(partitionUid != 0);
-		require(holders[msg.sender].status == holderStates.STATUS_REGISTERED);
+		require(holders[msg.sender].status == holderStates.STATUS_HOLDER);
 		require(tokenContract.balanceOf(msg.sender) >= amount);
 		require(tokenContract.burnFrom(msg.sender, amount));
 		
@@ -128,7 +134,7 @@ contract ERC1410 {
 				i = holders[msg.sender].nbUid;
 			}
 		}
-		uids[msg.sender][j] = 0;
+		uids[msg.sender][j+1] = 0;
 	}
 
 	/**
@@ -140,7 +146,8 @@ contract ERC1410 {
 	function transferByPartition( uint256 partitionUid, address receiver, uint256 price ) public{
 		require(tokenContract.balanceOf(receiver) >= price);
 		require(msg.sender == partitions[partitionUid].owner);
-		require(holders[receiver].status == holderStates.STATUS_REGISTERED);
+		require(holders[receiver].status == holderStates.STATUS_HOLDER);
+		//require(tokenContract.allowance(receiver, address(this)) >= price);
 		require(tokenContract.transferFrom(receiver, msg.sender, price));  // price should be partitionIndex[partitionuid].amount
 		
 		partitions[partitionUid].owner = receiver;
@@ -155,6 +162,83 @@ contract ERC1410 {
 			}
 		}
 		uids[msg.sender][j+1] = 0;
+	}
+
+	//----------------------------------------------
+	// specifications ERC1644 - Controller functions
+	//----------------------------------------------
+
+	/**
+	* Register a controller
+	**/
+	function registerController( address controller) public{
+		require(msg.sender == creator);	
+		require(tokenContract.balanceOf(controller) >= 0);
+		require(holders[controller].status == holderStates.STATUS_HOLDER);
+
+		holders[controller].status = holderStates.STATUS_CONTROLLER;
+	}
+
+	/**
+	* Revoke a controller
+	**/
+	function revokeController( address controller) public{
+		require(msg.sender == creator);	
+		require(holders[controller].status == holderStates.STATUS_CONTROLLER);
+
+		holders[controller].status = holderStates.STATUS_HOLDER;
+	}
+
+	function isControllable() external view returns (bool){
+		return isControl;
+	}
+
+
+	function controllerTransfer(address seller, address receiver, uint256 price, uint256 partitionUid) public{
+		require(holders[msg.sender].status == holderStates.STATUS_CONTROLLER);
+		require(holders[seller].status == holderStates.STATUS_HOLDER);
+		require(holders[receiver].status == holderStates.STATUS_HOLDER);
+
+		require(tokenContract.balanceOf(receiver) >= price);
+		require(seller == partitions[partitionUid].owner);
+		//require(tokenContract.allowance(receiver, address(this)) >= price);
+		require(tokenContract.transferFrom(receiver, seller, price));  // price should be partitionIndex[partitionuid].amount
+
+		partitions[partitionUid].owner = receiver;
+		holders[receiver].nbUid++;
+		uids[receiver][holders[receiver].nbUid] = partitionUid;
+
+		uint j;
+		for(uint i = 0; i < holders[seller].nbUid; i++) {
+			if(uids[seller][i+1] == partitionUid) {
+				j = i;
+				i = holders[seller].nbUid;
+			}
+		}
+		uids[seller][j+1] = 0;
+	}
+
+    function controllerRedeem(address seller, uint256 price, uint256 partitionUid) public{
+		require(holders[msg.sender].status == holderStates.STATUS_CONTROLLER);
+		require(holders[seller].status == holderStates.STATUS_HOLDER);
+
+		require(tokenContract.balanceOf(msg.sender) >= price);
+		require(seller == partitions[partitionUid].owner);
+		//require(tokenContract.allowance(receiver, address(this)) >= price);
+		require(tokenContract.transferFrom(msg.sender, seller, price));  // price should be partitionIndex[partitionuid].amount
+
+		partitions[partitionUid].owner = msg.sender;
+		holders[msg.sender].nbUid++;
+		uids[msg.sender][holders[msg.sender].nbUid] = partitionUid;
+
+		uint j;
+		for(uint i = 0; i < holders[seller].nbUid; i++) {
+			if(uids[seller][i+1] == partitionUid) {
+				j = i;
+				i = holders[seller].nbUid;
+			}
+		}
+		uids[seller][j+1] = 0;
 	}
 
 }
