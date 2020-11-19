@@ -2,7 +2,7 @@ pragma solidity ^0.6.0;
 
 import "interfaces/my_IERC20.sol";
 
-contract ERC1410 {
+contract ERC1400 {
 
     address creator; // Developper account
 	bool isControl;
@@ -51,6 +51,12 @@ contract ERC1410 {
 		tokenContract = IERC20(_tokenContractAddress);
 	}
 
+
+	//---------------------------------------------------------
+	// specifications ERC1410 - Partially Fungible Token events
+	//---------------------------------------------------------
+
+	event TransferByPartition( uint256 partitionUid, address receiver, uint256 price );
 
 	//------------------------------------------------------------
 	// specifications ERC1410 - Partially Fungible Token functions
@@ -162,7 +168,18 @@ contract ERC1410 {
 			}
 		}
 		uids[msg.sender][j+1] = 0;
+
+		emit TransferByPartition(partitionUid, receiver, price);
 	}
+
+
+	//-------------------------------------------
+	// specifications ERC1644 - Controller Events
+	//-------------------------------------------
+    event ControllerTransfer(address controller, address indexed seller, address indexed receiver, uint256 price, uint256 partitionUid);
+
+    event ControllerRedemption(address controller, address indexed seller, uint256 price, uint256 partitionUid);
+
 
 	//----------------------------------------------
 	// specifications ERC1644 - Controller functions
@@ -216,6 +233,8 @@ contract ERC1410 {
 			}
 		}
 		uids[seller][j+1] = 0;
+
+		emit ControllerTransfer(msg.sender, seller, receiver, price, partitionUid);
 	}
 
     function controllerRedeem(address seller, uint256 price, uint256 partitionUid) public{
@@ -239,6 +258,8 @@ contract ERC1410 {
 			}
 		}
 		uids[seller][j+1] = 0;
+
+		emit ControllerRedemption(msg.sender, seller, price, partitionUid);
 	}
 
 }

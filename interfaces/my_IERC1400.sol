@@ -1,6 +1,6 @@
 pragma solidity ^0.6.0;
 
-interface IERC1410 {
+interface IERC1400 {
 
 	//------------------------------------------------------------
 	// specifications ERC1410 - Partially Fungible Token functions
@@ -35,22 +35,4 @@ interface IERC1410 {
 
     function controllerRedeem(address sender, uint256 price, uint256 partitionUid) external view;
 
-
-	//-------------------------------------------
-	// specifications ERC1644 - Controller Events
-	//-------------------------------------------
-    event ControllerTransfer(
-        address _controller,
-        address indexed _from,
-        address indexed _to,
-        uint256 _value,
-        uint256 _data
-    );
-
-    event ControllerRedemption(
-        address _controller,
-        address indexed _tokenHolder,
-        uint256 _value,
-        uint256 _data
-    );
 }
