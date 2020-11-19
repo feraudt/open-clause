@@ -42,9 +42,9 @@ le script *use_storeService.py* est disponible pour tester les smart contrats *s
 
 	$ brownie console
 
-## utiliser le smart contract my_ERC1410.sol
+## utiliser le smart contract my_ERC1400.sol
 
-le script *use_myERC1410.py* est en cours de développement pour tester le smart contract *my_ERC1410.sol*. Les instructions du script fonctionnent et peuvent être lancées dans la console :
+le script *use_myERC1400.py* est en cours de développement pour tester le smart contract *my_ERC1400.sol*. Les instructions du script fonctionnent et peuvent être lancées dans la console :
 
 	$ brownie console
 
