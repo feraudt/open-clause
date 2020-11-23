@@ -1,1 +1,3 @@
-here will be the tests using pytest package
+# pour lancer pytest avec l'option -s (affichage de print()) :
+$ brownie test -s
+
