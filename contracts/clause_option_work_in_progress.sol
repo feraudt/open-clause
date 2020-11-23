@@ -1,6 +1,7 @@
 pragma solidity ^0.6.0;
 
 import "interfaces/my_IERC20.sol";
+import "interfaces/my_IERC1400.sol";
 
 contract Option {
 
@@ -28,12 +29,12 @@ contract Option {
 
 	uint256 public nbStock;     // nombre d'actions 
 	uint256 public priceStock;  // prix d'une action
-	uint256 public priceOption; // prix a payé par l'acheteur pour le droit d'option
+	uint256 public priceOption; // prix à payer par l'acheteur pour le droit d'option
 	uint256 public dateExpiration; // date de l'OS linux après laquelle l'acheteur ne peut plus exercer son droit d'option
 	uint256 public priceExercise;  // prix fixé pour l'exercice 
 
 	/**
-	 * Le vendeur initie le contrat en paramétrant toutes les variables.
+	 * Le vendeur initie le contrat en paramètrant toutes les variables.
 	 * The Seller should also have already "allowed" the ERC20 to be transferred in by the contract
 	 * in the amount specified by premiumAmount.  This will be held in escrow.
 	 */
