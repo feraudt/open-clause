@@ -19,6 +19,7 @@ eth-brownie utilise l'émulateur ethereum en ligne de commande *ganache-cli* dis
 	https://github.com/trufflesuite/ganache-cli
 
 Pour l'analyse du code, MythX est disponible sur github :
+
 	https://github.com/dmuhs/mythx-cli
 
  Pour l'installer, cloner le projet, puis l'installer avec setuptool :
