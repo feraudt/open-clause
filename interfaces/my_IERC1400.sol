@@ -2,10 +2,14 @@ pragma solidity ^0.6.0;
 
 interface IERC1400 {
 
+	function getPartitionOwner(uint256 partitionUid) external view returns (address);
+
+	function getPartitionStatus(uint256 partitionUid) external view returns (uint);
+
 	//------------------------------------------------------------
 	// specifications ERC1410 - Partially Fungible Token functions
 	//------------------------------------------------------------
-
+	
 	function registerAccount() external view;
 
 	function partitionsOf(address owner) external view returns ( uint256[] memory );
@@ -34,5 +38,23 @@ interface IERC1400 {
 	function controllerTransfer(address sender, address receiver, uint256 price, uint256 partitionUid) external view;
 
     function controllerRedeem(address sender, uint256 price, uint256 partitionUid) external view;
+
+	//---------------------------------------
+	// addition to ERC1400 - Escrow functions
+	//---------------------------------------
+
+	function registerEscrow(address escrow) external view returns (bool);
+
+	function approveEscrow(address escrow, uint256 partitionUid, uint256 price) external view returns (bool);
+
+	function allowanceEscrow(address owner, address escrow, uint256 partitionUid) external view returns (uint256);
+
+	function whoissender() external returns (address);
+
+	function confinePartition(address owner, address recipient, address escrow, uint256 partitionUid, uint256 expirationDate, uint256 priceExercise) external returns (bool);
+
+	function stopOptionExercise(address user, address escrow, uint256 partitionUid) external returns (bool);
+
+	function escrowTransfer(address seller, address receiver, address escrow, uint256 price, uint256 partitionUid) external;
 
 }
