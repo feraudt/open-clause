@@ -55,9 +55,15 @@ le script *use_storeService.py* est disponible pour tester les smart contrats *s
 
 ## utiliser le smart contract my_ERC1400.sol
 
-le script *use_myERC1400.py* est disponible pour tester le smart contract *my_ERC1400.sol*. Ce smart contract implémente le token partiellemnt fongible des actions avec ERC1410 et le rôle du contrôleur avec ERC1644. Pour effectuer le tests des fonctionnalités, il suffit de lancer l'une après l'autre les instructions du script dans la console :
+le script *use_myERC1400.py* est disponible pour tester le smart contract *my_ERC1400.sol*. Ce smart contract implémente le token partiellemnt fongible des actions avec ERC1410 et le rôle du contrôleur avec ERC1644. Pour effectuer le test des fonctionnalités, il suffit de lancer l'une après l'autre les instructions du script dans la console :
 
 	$ brownie console
+
+## utiliser le smart contract clause_option.sol
+
+le script *use_clause_option.py* est disponible pour tester le smart contract *clause_option.sol*. Ce smart contract implémente les fonctions nécessaires pour automatiser la clause d'option. Le script est bien commenté pour comprendre le déroulement des étapes à chaque commande. Il s'appuie sur les smart contracts *my_ERC1400.sol* et *ERC20.sol*. Pour dérouler les étapes de la clause d'option, il suffit de lancer l'une après l'autre les commandes du script dans la console :
+
+ 	$ brownie console
 
 
 
