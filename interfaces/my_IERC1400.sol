@@ -51,10 +51,13 @@ interface IERC1400 {
 
 	function whoissender() external returns (address);
 
-	function confinePartition(address owner, address recipient, address escrow, uint256 partitionUid, uint256 expirationDate, uint256 priceExercise) external returns (bool);
+	function confinePartition(address recipient, uint256 partitionUid, uint256 expirationDate, uint256 priceExercise) external returns (bool);
 
-	function stopOptionExercise(address user, address escrow, uint256 partitionUid) external returns (bool);
+	function stopOptionByPromisor(uint256 partitionUid) external returns (bool);
+	function stopOptionByRecipient(uint256 partitionUid) external returns (bool);
 
-	function escrowTransfer(address seller, address receiver, address escrow, uint256 price, uint256 partitionUid) external;
+	function escrowTransfer(address seller, uint256 price, uint256 partitionUid) external;
+
+	function whoIsOrigin() external returns (address);
 
 }

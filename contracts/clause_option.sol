@@ -83,7 +83,9 @@ contract clauseOption {
 		// changement status partition en CONFINED (pas de chgt de owner)
 		// mise à jour de la variable mapping escrows (fait sur le contract ERC1400)	
 		uint256 endDate = now + duration * 1 days;
-		tokenStock.confinePartition(msg.sender, recipient, address(this), partitionUid, endDate, priceExercise);
+		//tokenStock.confinePartition(msg.sender, recipient, partitionUid, endDate, priceExercise);
+		// the promisor is the origin (msg.sender) of the transactions call
+		tokenStock.confinePartition(recipient, partitionUid, endDate, priceExercise);
 
 		// Transfer du priceOption sur le contract ERC20
 		tokenPayment.transferFrom(recipient, msg.sender, priceOption);
@@ -96,7 +98,7 @@ contract clauseOption {
 
 	// The recipient accepts during the option exercice duration
 
-	function recipientAccept(uint256 partitionUid) public {
+	function recipientAccept(uint256 partitionUid) public returns (bool){
 		require(msg.sender == options[partitionUid].recipient);
 		require(tokenPayment.balanceOf(msg.sender) >= options[partitionUid].priceExercise);
 		require(now <= options[partitionUid].expirationDate);
@@ -105,23 +107,28 @@ contract clauseOption {
 
 		// Transfer de la partition au coût de priceExercise
 		require(tokenStock.allowanceEscrow(options[partitionUid].promisor, address(this), partitionUid) >= options[partitionUid].priceExercise);
-		tokenStock.escrowTransfer(options[partitionUid].promisor, msg.sender, address(this), options[partitionUid].priceExercise, partitionUid);
-		tokenStock.stopOptionExercise(msg.sender, address(this), partitionUid);
+		// the recipient is the origin (msg.sender) of the transactions call
+		tokenStock.escrowTransfer(options[partitionUid].promisor, options[partitionUid].priceExercise, partitionUid);
+
+		//tokenStock.stopOptionExercise(partitionUid);
+		require(tokenStock.stopOptionByRecipient(partitionUid));
 		options[partitionUid].status = optionStates.STATUS_CLOSED;
+		return true;
 	}
 
 
 	// The recipient denies during the option exercice duration
 
-	function recipientDeny(uint256 partitionUid) public {
+	function recipientDeny(uint256 partitionUid) public returns (bool){
 		require(msg.sender == options[partitionUid].recipient);
 		require(now <= options[partitionUid].expirationDate);
 		require(options[partitionUid].status == optionStates.STATUS_PENDING);
 		require(tokenStock.getPartitionStatus(partitionUid) == 1, "la partition cible de l'option doit être en séquestre - STATUS_CONFINED is 1");
 
 		// levée du séquestre de la partition
-		tokenStock.stopOptionExercise(msg.sender, address(this), partitionUid);
+		require(tokenStock.stopOptionByRecipient(partitionUid));
 		options[partitionUid].status = optionStates.STATUS_CLOSED;
+		return true;
 	}
 
 
@@ -131,9 +138,14 @@ contract clauseOption {
 		require(msg.sender == options[partitionUid].promisor);
 		require(now > options[partitionUid].expirationDate);
 
-		tokenStock.stopOptionExercise(msg.sender, address(this), partitionUid);
+		require(tokenStock.stopOptionByPromisor(partitionUid));
 		options[partitionUid].status = optionStates.STATUS_CLOSED;
 		return true;
+	}
+
+	// Help to debug
+	function isOrigin() public returns (address){
+		return tokenStock.whoIsOrigin();
 	}
 }
 
