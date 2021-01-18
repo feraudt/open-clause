@@ -25,15 +25,15 @@ package "stockD_token" #Chartreuse {
 [ERC1400(1)] .up.> [ERC20(0)]
 [ERC1400(2)] .left.> [ERC20(0)]
 
-package "clause_option" #Red {
+package "clause_option" #Gold {
 [sc_clause_option(0)]
 }
 
-package "clause_sell-or-buy" #Red {
+package "clause_sell-or-buy" #Gold {
 [sc_clause_sellOrBuy(0)]
 }
 
-package "clause_exclusion" #Red {
+package "clause_exclusion" #Gold {
 [sc_clause_exclusion(0)]
 }
 
