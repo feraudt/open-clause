@@ -1,5 +1,7 @@
 @startuml
 
+title "Components diagram - Smart contracts & Tokens"
+
 package "payment_token" #LightBlue {
 [ERC20]
 }
