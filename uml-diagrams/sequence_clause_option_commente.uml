@@ -1,5 +1,7 @@
 @startuml
 
+title "Sequence diagram - Clause Option"
+
 actor developer
 actor holder_Alice
 actor holder_Bob
