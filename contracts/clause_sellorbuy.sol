@@ -102,12 +102,29 @@ contract clauseSellorbuy {
 		return true;
 	}
 
+	// TODO : public for debug only - SHOULD be private
+	function deconfine(address holder) public returns (bool){
+		uint i;
+		uint256 nbPartition;
+		nbPartition = tokenStock.getHolderNbuid(holder);
+		require(nbPartition > 0);
+
+		uint256[] memory uidList = new uint256[](nbPartition);
+		uidList = tokenStock.partitionsOf(holder);
+
+		for(i=0; i<nbPartition; i++) {
+			tokenStock.deconfinePartition(holder, uidList[i]);
+		}
+		return true;
+	}
+
 
 	// The remainer accepts during the notice of sale duration
 	// The partitions are transfered from remainer to offerer
 	function remainerAccept() public returns (bool){
+		address offerer = notices[msg.sender].offerer;
 		require(msg.sender == notices[msg.sender].remainer);
-		require(tokenPayment.balanceOf(notices[msg.sender].offerer) >= notices[msg.sender].pricePurchase);
+		require(tokenPayment.balanceOf(offerer) >= notices[msg.sender].pricePurchase);
 		require(now <= notices[msg.sender].expirationDate);
 		require(notices[msg.sender].status == sellorbuyStates.STATUS_PENDING);
 
@@ -123,23 +140,19 @@ contract clauseSellorbuy {
 		// le offerer doit avoir mis au préalable une allowance sur le contract ERC20 pour autoriser le débit du coût priceDelta lié à l'exercice
 		uint256 priceDelta;
 		priceDelta = notices[msg.sender].pricePurchase - tokenStock.balanceOf(msg.sender);
-		require(tokenPayment.allowance(notices[msg.sender].offerer, address(this)) >= priceDelta);
+		require(tokenPayment.allowance(offerer, address(this)) >= priceDelta);
 
 		// Transfer des partitions au coût de pricePurchase de msg.sender vers offerer
 		for(i=0; i<nbPartition; i++) {
 			require(tokenStock.allowanceEscrow(msg.sender, address(this), uidList[i]) >= tokenStock.getPartitionAmount(uidList[i]));
-			tokenStock.escrowExplicitTransfer(msg.sender, notices[msg.sender].offerer, tokenStock.getPartitionAmount(uidList[i]), uidList[i]);
+			tokenStock.escrowExplicitTransfer(msg.sender, offerer, tokenStock.getPartitionAmount(uidList[i]), uidList[i]);
 		}
 
-		tokenPayment.transferFrom(notices[msg.sender].offerer, msg.sender, priceDelta);
+		tokenPayment.transferFrom(offerer, msg.sender, priceDelta);
 		notices[msg.sender].status = sellorbuyStates.STATUS_CLOSED;
 
 		// on déconfine les partitions de offerer
-		nbPartition = tokenStock.getHolderNbuid(notices[msg.sender].offerer);
-		uidList = tokenStock.partitionsOf(notices[msg.sender].offerer);
-		for(i=0; i<nbPartition; i++) {
-			tokenStock.deconfinePartition(notices[msg.sender].offerer, uidList[i]);
-		}
+		//require(deconfine(offerer) == true);
 
 		// l'avis de vente est clos
 		notices[msg.sender].status = sellorbuyStates.STATUS_CLOSED;
@@ -176,10 +189,10 @@ contract clauseSellorbuy {
 
 		// Transfer des partitions au coût de pricePurchase de offerer vers msg.sender
 		for(i=0; i<nbPartition; i++) {
-			require(tokenStock.allowanceEscrow(notices[msg.sender].offerer, address(this), uidList[i]) >= tokenStock.getPartitionAmount(uidList[i]));
+			require(tokenStock.allowanceEscrow(offerer, address(this), uidList[i]) >= tokenStock.getPartitionAmount(uidList[i]));
 			tokenStock.escrowExplicitTransfer(offerer, msg.sender, tokenStock.getPartitionAmount(uidList[i]), uidList[i]);
 			// on déconfine les partitions de offerer
-			tokenStock.deconfinePartition(notices[msg.sender].offerer, uidList[i]);
+			tokenStock.deconfinePartition(offerer, uidList[i]);
 		}
 
 		tokenPayment.transferFrom(msg.sender, offerer, priceDelta);

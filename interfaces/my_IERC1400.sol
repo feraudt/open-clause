@@ -6,6 +6,10 @@ interface IERC1400 {
 
 	function getPartitionStatus(uint256 partitionUid) external view returns (uint);
 
+	function getPartitionAmount(uint256 partitionUid) external view returns (uint);
+
+	function getHolderNbuid(address user) external view returns (uint);
+
 	//------------------------------------------------------------
 	// specifications ERC1410 - Partially Fungible Token functions
 	//------------------------------------------------------------
@@ -52,11 +56,13 @@ interface IERC1400 {
 	function whoissender() external returns (address);
 
 	function confinePartition(address recipient, uint256 partitionUid, uint256 expirationDate, uint256 priceExercise) external returns (bool);
+	function deconfinePartition(address recipient, uint256 partitionUid) external returns (bool);
 
 	function stopOptionByPromisor(uint256 partitionUid) external returns (bool);
 	function stopOptionByRecipient(uint256 partitionUid) external returns (bool);
 
 	function escrowTransfer(address seller, uint256 price, uint256 partitionUid) external;
+	function escrowExplicitTransfer(address seller, address recipient, uint256 price, uint256 partitionUid) external;
 
 	function whoIsOrigin() external returns (address);
 
