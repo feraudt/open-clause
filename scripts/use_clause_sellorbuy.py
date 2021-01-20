@@ -146,22 +146,22 @@ ERC1400[0].confined(1234)
 ### out : ("0x1BbDe47982ac6dEB4E752a4DFF32Cb70DF8e5C18", 1611089836, 2, "0xF800DeBE778aA16295AEF005db9c85aD4293DfA0")
 
 
-##### J'en suis là #########
 
 # -> dans la durée des deux jours, Bob accepte la vente de ses partitions
-# Alice autorise le contract clauseSellorbuy à débiter son compte de 3 tokens ERC20 : c'est le coût de l'avis de vente
-##### TODO : il faut que ce soit un require lors du lancement de l'avis de vente
-ERC20FixedSupply[0].approve(clauseSellorbuy[0].address, 3, {'from':acc1})
-ERC20FixedSupply[0].approve(ERC1400[0].address, 5, {'from':acc1})
-##### TODO
+#Alice doit avoir positionner les autorisations avant de lancer l'avis de vente
+ERC20FixedSupply[0].allowance(acc1, clauseSellorbuy[0].address)
+ERC20FixedSupply[0].allowance(acc1, ERC1400[0].address)
 
 # Bob autorise le contract clauseSellorbuy à modifier le status de ses partitions
 ERC1400[0].approveEscrow(clauseSellorbuy[0].address, 4321, 2, {'from':acc2})
 ERC1400[0].approveEscrow(clauseSellorbuy[0].address, 8765, 3, {'from':acc2})
 
+##### J'en suis là #########
 # Bob indique son accord sur le contract d'option
 clauseSellorbuy[0].remainerAccept({'from':acc2})
+clauseSellorbuy[0].deconfine(acc1) # ---> pour debug : doit être inclut dans "remainerAccept"
 
+ERC1400[0].allowanceEscrow(acc1, clauseSellorbuy[0].address, 1234)
 ERC1400[0].partitions(1234)
 ### out : ("0x034C935853f5cbE76169d5c643Ac0657fDC50DFf", 2, 1606861931, 0)
 

@@ -73,6 +73,14 @@ contract ERC1400 {
         return uint(partitions[partitionUid].status);
     }
 
+	function getPartitionAmount(uint256 partitionUid) public view returns (uint) {
+        return uint(partitions[partitionUid].amount);
+    }
+
+	function getHolderNbuid(address user) public view returns (uint) {
+        return uint(holders[user].nbUid);
+    }
+
 	//---------------------------------------------------------
 	// specifications ERC1410 - Partially Fungible Token events
 	//---------------------------------------------------------
@@ -314,6 +322,7 @@ contract ERC1400 {
 
 	event ApprovalEscrow(address owner, address escrow, uint256 partitionUid, uint256 price);
 	event EscrowTransfer(address escrow, address seller, address receiver, uint256 price, uint256 partitionUid);
+	event EscrowExplicitTransfer(address escrow, address seller, address recipient, uint256 price, uint256 partitionUid);
 
 	//---------------------------------------
 	// addition to ERC1400 - Escrow functions
@@ -364,7 +373,7 @@ contract ERC1400 {
 		function confinePartition(address recipient, uint256 partitionUid, uint256 expirationDate, uint256 priceExercise) public returns (bool){
 		require(tx.origin == partitions[partitionUid].owner);
 		require(holders[msg.sender].status == holderStates.STATUS_ESCROW);
-		require(allowanceEscrow(tx.origin, msg.sender, partitionUid) >= priceExercise, "le contract de séquestre doit être autorisé à modifier le status de la partition");
+		require(_allowanceEscrow[tx.origin][msg.sender][partitionUid] >= priceExercise, "le contract de séquestre doit être autorisé à modifier le status de la partition");
 
 		partitions[partitionUid].status = partitionStates.STATUS_CONFINED;
 		confined[partitionUid].escrow = msg.sender;
@@ -373,6 +382,24 @@ contract ERC1400 {
 		confined[partitionUid].recipient = recipient;
 		return true;
 	}
+
+	/**
+	* Deconfinement of a Partition
+	**/
+
+	function deconfinePartition(address recipient, uint256 partitionUid) public returns (bool){
+		require(partitions[partitionUid].owner == recipient);
+		require(partitions[partitionUid].status == partitionStates.STATUS_CONFINED);
+		require(holders[msg.sender].status == holderStates.STATUS_ESCROW);
+		require(_allowanceEscrow[recipient][msg.sender][partitionUid] >= partitions[partitionUid].amount, "le contract Escrow doit être autorisé à modifier le status de la partition");
+		
+		partitions[partitionUid].status = partitionStates.STATUS_ACTIVE;
+		if(confined[partitionUid].expirationDate > now) {
+			confined[partitionUid].expirationDate = now;
+		}
+		return true;
+	}
+
 
 	/**
 	* stop the Option Exercise on a Partition by escrow account or after expiration of the exercise 
@@ -409,7 +436,6 @@ contract ERC1400 {
 	* transfer partition from escrow
 	**/
 
-	//function escrowTransfer(address seller, address receiver, uint256 price, uint256 partitionUid) public{
 	function escrowTransfer(address seller, uint256 price, uint256 partitionUid) public{
 		require(tx.origin == confined[partitionUid].recipient);
 		
@@ -423,5 +449,17 @@ contract ERC1400 {
 		_transfertByPartition(partitionUid, seller, tx.origin, price);
 
 		emit EscrowTransfer(msg.sender, seller, tx.origin, price, partitionUid);
+	}
+
+
+	function escrowExplicitTransfer(address seller, address recipient, uint256 price, uint256 partitionUid) public{
+		require(holders[msg.sender].status == holderStates.STATUS_ESCROW);
+		require(holders[seller].status == holderStates.STATUS_HOLDER);
+		require(holders[recipient].status == holderStates.STATUS_HOLDER);
+		require(seller == partitions[partitionUid].owner);
+
+		_transfertByPartition(partitionUid, seller, recipient, price);
+
+		emit EscrowExplicitTransfer(msg.sender, seller, recipient, price, partitionUid);
 	}
 }
