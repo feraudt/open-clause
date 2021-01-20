@@ -8,8 +8,8 @@ contract clauseSellorbuy {
 	// déclaration des différents de l'avis de vente
 	enum sellorbuyStates {
 		STATUS_UNUSED,  // par défaut : 0
-		STATUS_PENDING,  
-		STATUS_CLOSED 
+		STATUS_PENDING,
+		STATUS_CLOSED
 	}
 
 	// Represents a notice of sale parameters
@@ -89,7 +89,7 @@ contract clauseSellorbuy {
 
 		// Transfer partitions[partitionUid].owner vers sequestre (address(this)) sur contract ERC1400
 		// changement status partition en CONFINED (pas de chgt de owner)
-		// mise à jour de la variable mapping escrows (fait sur le contract ERC1400)	
+		// mise à jour de la variable mapping escrows (fait sur le contract ERC1400)
 		uint256 endDate = now + duration * 1 days;
 
 		//tokenStock.confinePartition(msg.sender, recipient, partitionUid, endDate, priceExercise);
@@ -103,20 +103,20 @@ contract clauseSellorbuy {
 	}
 
 	// TODO : public for debug only - SHOULD be private
-	function deconfine(address holder) public returns (bool){
-		uint i;
-		uint256 nbPartition;
-		nbPartition = tokenStock.getHolderNbuid(holder);
-		require(nbPartition > 0);
-
-		uint256[] memory uidList = new uint256[](nbPartition);
-		uidList = tokenStock.partitionsOf(holder);
-
-		for(i=0; i<nbPartition; i++) {
-			tokenStock.deconfinePartition(holder, uidList[i]);
-		}
-		return true;
-	}
+	// function deconfine(address holder) private returns (bool){
+	// 	uint i;
+	// 	uint256 nbPartition;
+	// 	nbPartition = tokenStock.getHolderNbuid(holder);
+	// 	require(nbPartition > 0);
+	//
+	// 	uint256[] memory uidList = new uint256[](nbPartition);
+	// 	uidList = tokenStock.partitionsOf(holder);
+	//
+	// 	for(i=0; i<nbPartition; i++) {
+	// 		tokenStock.deconfinePartition(holder, uidList[i]);
+	// 	}
+	// 	return true;
+	// }
 
 
 	// The remainer accepts during the notice of sale duration
@@ -152,7 +152,21 @@ contract clauseSellorbuy {
 		notices[msg.sender].status = sellorbuyStates.STATUS_CLOSED;
 
 		// on déconfine les partitions de offerer
-		//require(deconfine(offerer) == true);
+		// nbPartition = tokenStock.getHolderNbuid(offerer);
+		// require(nbPartition > 0);
+		// uidList = tokenStock.partitionsOf(offerer);
+		//
+		// for(i=0; i<nbPartition; i++) {
+		// 	tokenStock.deconfinePartition(offerer, uidList[i]);
+		// }
+
+		//tokenStock.deconfinePartition(offerer, 1234);
+		uint nbPart = tokenStock.getHolderNbuid(offerer);
+		uint256 uidPart;
+		for(i=0; i<nbPart; i++) {
+			uidPart = tokenStock.getUid(offerer, i+1);
+			tokenStock.deconfinePartition(offerer, uidPart);
+		}
 
 		// l'avis de vente est clos
 		notices[msg.sender].status = sellorbuyStates.STATUS_CLOSED;
@@ -179,7 +193,7 @@ contract clauseSellorbuy {
 		uidList = tokenStock.partitionsOf(offerer);
 
 		for (i=0; i<nbPartition; i++) {
-			require(tokenStock.getPartitionStatus(uidList[i]) == 1, "les partitions de l'offerer doivent être en séquestre - STATUS_CONFINED is 1");
+			require(tokenStock.getPartitionStatus(uidList[i]) == 1, "les partitions de offerer doivent être en séquestre - STATUS_CONFINED is 1");
 		}
 
 		// le remainer doit avoir mis au préalable une allowance sur le contrat ERC20 pour permettre le paiement des partitions
@@ -191,12 +205,10 @@ contract clauseSellorbuy {
 		for(i=0; i<nbPartition; i++) {
 			require(tokenStock.allowanceEscrow(offerer, address(this), uidList[i]) >= tokenStock.getPartitionAmount(uidList[i]));
 			tokenStock.escrowExplicitTransfer(offerer, msg.sender, tokenStock.getPartitionAmount(uidList[i]), uidList[i]);
-			// on déconfine les partitions de offerer
-			tokenStock.deconfinePartition(offerer, uidList[i]);
 		}
 
 		tokenPayment.transferFrom(msg.sender, offerer, priceDelta);
-		
+
 		// l'avis de vente est clos
 		notices[msg.sender].status = sellorbuyStates.STATUS_CLOSED;
 
@@ -229,7 +241,7 @@ contract clauseSellorbuy {
 			// on déconfine les partitions de offerer
 			tokenStock.deconfinePartition(notices[remainer].offerer, uidList[i]);
 		}
-		
+
 		// l'avis de vente est clos
 		notices[remainer].status = sellorbuyStates.STATUS_CLOSED;
 		return true;

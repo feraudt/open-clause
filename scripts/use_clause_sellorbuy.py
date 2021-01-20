@@ -29,7 +29,7 @@ ERC1400[0].address
 clauseSellorbuy.deploy(ERC1400[0].address, ERC20FixedSupply[0].address, {'from':acc0})
 
 clauseSellorbuy[0].address
-### out : 
+### out :
 
 
 ###----------------------------------------------------------
@@ -54,15 +54,15 @@ ERC1400[0].holders(acc2)
 ### Achat des partitions
 ###---------------------
 
-# transfer 20 tokens vers account#1 (Holder : Alice)
-ERC20FixedSupply[0].transfer(acc1, 20)
+# transfer 50 tokens vers account#1 (Holder : Alice)
+ERC20FixedSupply[0].transfer(acc1, 50)
 ERC20FixedSupply[0].balanceOf(acc1)
-### out : 20
+### out : 50
 
-# transfer 20 tokens vers account#2 (Holder : Bob)
-ERC20FixedSupply[0].transfer(acc2, 20)
+# transfer 50 tokens vers account#2 (Holder : Bob)
+ERC20FixedSupply[0].transfer(acc2, 50)
 ERC20FixedSupply[0].balanceOf(acc2)
-### out : 20
+### out : 50
 
 # account#1 autorise le contract ERC1400 à débiter son compte de 5 tokens
 ERC20FixedSupply[0].approve(ERC1400[0].address, 5, {'from':acc1})
@@ -145,25 +145,20 @@ ERC1400[0].partitions(1234)
 ERC1400[0].confined(1234)
 ### out : ("0x1BbDe47982ac6dEB4E752a4DFF32Cb70DF8e5C18", 1611089836, 2, "0xF800DeBE778aA16295AEF005db9c85aD4293DfA0")
 
-
-
 # -> dans la durée des deux jours, Bob accepte la vente de ses partitions
 #Alice doit avoir positionner les autorisations avant de lancer l'avis de vente
 ERC20FixedSupply[0].allowance(acc1, clauseSellorbuy[0].address)
 ERC20FixedSupply[0].allowance(acc1, ERC1400[0].address)
+ERC1400[0].allowanceEscrow(acc1, clauseSellorbuy[0].address, 1234)
+ERC1400[0].partitions(1234)
+### out :
 
 # Bob autorise le contract clauseSellorbuy à modifier le status de ses partitions
 ERC1400[0].approveEscrow(clauseSellorbuy[0].address, 4321, 2, {'from':acc2})
 ERC1400[0].approveEscrow(clauseSellorbuy[0].address, 8765, 3, {'from':acc2})
 
-##### J'en suis là #########
-# Bob indique son accord sur le contract d'option
+# Bob accepte la vente de ses partitions
 clauseSellorbuy[0].remainerAccept({'from':acc2})
-clauseSellorbuy[0].deconfine(acc1) # ---> pour debug : doit être inclut dans "remainerAccept"
-
-ERC1400[0].allowanceEscrow(acc1, clauseSellorbuy[0].address, 1234)
-ERC1400[0].partitions(1234)
-### out : ("0x034C935853f5cbE76169d5c643Ac0657fDC50DFf", 2, 1606861931, 0)
 
 ERC20FixedSupply[0].balanceOf(acc2)
 ### out : 16 (20 - priceOption - priceExercise)
@@ -172,8 +167,37 @@ ERC1400[0].confined(1234)
 ### out : ("0x1BbDe47982ac6dEB4E752a4DFF32Cb70DF8e5C18", 1606861993, 3, "0x034C935853f5cbE76169d5c643Ac0657fDC50DFf")
 
 
+###################
+# Test remainerDeny
+###################
 
+# account#2 autorise le contract ERC1400 à débiter son compte de 10 tokens
+ERC20FixedSupply[0].approve(ERC1400[0].address, 10, {'from':acc2})
+ERC20FixedSupply[0].allowance(acc2, ERC1400[0].address)
+### out : 5
 
+# Bob (account#2) achète une partition ERC1400 de 10 tokens
+ERC1400[0].buyPartition(8888, 10, {'from':acc2})
 
+# Alice (account#1) initie un avis de vente :
+#	- destiné à Bob (account#2)
+#	- au prix de 8 tokens (> au montant du total des partitions de 5 tokens)
+#	- la durée de l'avis de vente est de 2 jours
 
+# Alice autorise le contract clauseSellorbuy à modifier le status de ses partitions
+ERC1400[0].approveEscrow(clauseSellorbuy[0].address, 1234, 2, {'from':acc1})
+ERC1400[0].approveEscrow(clauseSellorbuy[0].address, 5678, 3, {'from':acc1})
+ERC1400[0].approveEscrow(clauseSellorbuy[0].address, 4321, 2, {'from':acc1})
+ERC1400[0].approveEscrow(clauseSellorbuy[0].address, 8765, 3, {'from':acc1})
 
+# Alice autorise le contract ERC20 à débiter son compte du coût de l'avis de vente (12 tokens - 10 tokens correspondants à la valeur des partitions)
+ERC20FixedSupply[0].approve(clauseSellorbuy[0].address, 2, {'from':acc1})
+
+# Alice lance de l'avis de vente
+clauseSellorbuy[0].startSellorbuy(acc2, 12, 2, {'from':acc1})
+
+# Bob autorise le contrat clauseSellorbuy à débiter son compte
+ERC20FixedSupply[0].approve(clauseSellorbuy[0].address, 2, {'from':acc2})
+
+# Bob indique son refus de vendre ses partitions et achète celles d'Alice
+clauseSellorbuy[0].remainerDeny({'from':acc2})

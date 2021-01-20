@@ -10,10 +10,12 @@ interface IERC1400 {
 
 	function getHolderNbuid(address user) external view returns (uint);
 
+	function getUid(address user, uint index) external view returns (uint256);
+
 	//------------------------------------------------------------
 	// specifications ERC1410 - Partially Fungible Token functions
 	//------------------------------------------------------------
-	
+
 	function registerAccount() external view;
 
 	function partitionsOf(address owner) external view returns ( uint256[] memory );

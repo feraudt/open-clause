@@ -6,11 +6,11 @@ contract ERC1400 {
 
     address creator; // Developper account
 	bool isControl;
-	IERC20 tokenContract; // TokenContract managing payment 
+	IERC20 tokenContract; // TokenContract managing payment
 
 	enum partitionStates {
-		STATUS_ACTIVE, 
-		STATUS_CONFINED, 
+		STATUS_ACTIVE,
+		STATUS_CONFINED,
 		STATUS_SOLD
 	}
 
@@ -73,12 +73,16 @@ contract ERC1400 {
         return uint(partitions[partitionUid].status);
     }
 
-	function getPartitionAmount(uint256 partitionUid) public view returns (uint) {
+  	function getPartitionAmount(uint256 partitionUid) public view returns (uint) {
         return uint(partitions[partitionUid].amount);
     }
 
-	function getHolderNbuid(address user) public view returns (uint) {
+  	function getHolderNbuid(address user) public view returns (uint) {
         return uint(holders[user].nbUid);
+    }
+
+    function getUid(address user, uint index) public view returns (uint256) {
+        return uint(uids[user][index]);
     }
 
 	//---------------------------------------------------------
@@ -118,7 +122,7 @@ contract ERC1400 {
 	/**
 	* Register an account
 	**/
-	function registerAccount() public{	
+	function registerAccount() public{
 		require(tokenContract.balanceOf(msg.sender) >= 0);
 		holders[msg.sender].nbUid = 0;
 		holders[msg.sender].status = holderStates.STATUS_HOLDER;
@@ -126,7 +130,7 @@ contract ERC1400 {
 
 	/**
 	* Buy a partition through TokenContract payment.
-	* Used in ERC20 standard 
+	* Used in ERC20 standard
 	* @param partitionUid, amount
 	*
 	*/
@@ -135,26 +139,26 @@ contract ERC1400 {
 		require(holders[msg.sender].status == holderStates.STATUS_HOLDER);
 		require(tokenContract.balanceOf(msg.sender) >= amount);
 		require(tokenContract.burnFrom(msg.sender, amount));
-		
+
 		partitions[partitionUid].owner = msg.sender;
 		partitions[partitionUid].amount = amount;
 		partitions[partitionUid].creation = now;
 		partitions[partitionUid].status = partitionStates.STATUS_ACTIVE;
-		
+
 		holders[msg.sender].nbUid++;
 		uids[msg.sender][holders[msg.sender].nbUid] = partitionUid;
 	}
 
 	/**
 	* Sell a partition through TokenContract payment.
-	* Used in ERC20 standard 
+	* Used in ERC20 standard
 	* @param partitionUid, amount
 	*
 	*/
 	function sellPartition( uint256 partitionUid ) public{
 		require(msg.sender == partitions[partitionUid].owner);
 		require(tokenContract.mintFrom(msg.sender, partitions[partitionUid].amount));
-		
+
 		partitions[partitionUid].amount = 0;
 		partitions[partitionUid].status = partitionStates.STATUS_SOLD;
 
@@ -170,7 +174,7 @@ contract ERC1400 {
 
 	/**
 	* Transfer a partition through TokenContract payment.
-	* Used in ERC20 standard 
+	* Used in ERC20 standard
 	* @param partitionUid, receiver account
 	*
 	*/
@@ -178,12 +182,12 @@ contract ERC1400 {
 		require(holders[receiver].status == holderStates.STATUS_HOLDER);
 
 		_transfertByPartition(partitionUid, msg.sender, receiver, price);
-		
+
 		//require(tokenContract.balanceOf(receiver) >= price);
 		//require(msg.sender == partitions[partitionUid].owner);
 		//require(tokenContract.allowance(receiver, address(this)) >= price);
 		//require(tokenContract.transferFrom(receiver, msg.sender, price));  // price should be partitionIndex[partitionuid].amount
-		
+
 		//partitions[partitionUid].owner = receiver;
 		//holders[receiver].nbUid++;
 		//uids[receiver][holders[receiver].nbUid] = partitionUid;
@@ -206,7 +210,7 @@ contract ERC1400 {
 		require(sender == partitions[partitionUid].owner);
 		//require(tokenContract.allowance(receiver, address(this)) >= price);
 		require(tokenContract.transferFrom(receiver, sender, price));  // price should be partitionIndex[partitionuid].amount
-		
+
 		partitions[partitionUid].owner = receiver;
 		holders[receiver].nbUid++;
 		uids[receiver][holders[receiver].nbUid] = partitionUid;
@@ -239,7 +243,7 @@ contract ERC1400 {
 	* Register a controller
 	**/
 	function registerController( address controller) public{
-		require(msg.sender == creator);	
+		require(msg.sender == creator);
 		require(tokenContract.balanceOf(controller) >= 0);
 		require(holders[controller].status == holderStates.STATUS_HOLDER);
 
@@ -250,7 +254,7 @@ contract ERC1400 {
 	* Revoke a controller
 	**/
 	function revokeController( address controller) public{
-		require(msg.sender == creator);	
+		require(msg.sender == creator);
 		require(holders[controller].status == holderStates.STATUS_CONTROLLER);
 
 		holders[controller].status = holderStates.STATUS_HOLDER;
@@ -388,11 +392,12 @@ contract ERC1400 {
 	**/
 
 	function deconfinePartition(address recipient, uint256 partitionUid) public returns (bool){
-		require(partitions[partitionUid].owner == recipient);
-		require(partitions[partitionUid].status == partitionStates.STATUS_CONFINED);
-		require(holders[msg.sender].status == holderStates.STATUS_ESCROW);
-		require(_allowanceEscrow[recipient][msg.sender][partitionUid] >= partitions[partitionUid].amount, "le contract Escrow doit être autorisé à modifier le status de la partition");
-		
+    // TODO : decomment the requirements
+    require(partitions[partitionUid].owner == recipient, "le recipient est le propriétaire de la partition");
+		//require(partitions[partitionUid].status == partitionStates.STATUS_CONFINED, "la partition doit être confinée");
+		require(holders[msg.sender].status == holderStates.STATUS_ESCROW, "la transaction doit être émise depuis un compte de séquestre");
+    //require(_allowanceEscrow[recipient][msg.sender][partitionUid] >= partitions[partitionUid].amount, "le contract Escrow doit être autorisé à modifier le status de la partition");
+
 		partitions[partitionUid].status = partitionStates.STATUS_ACTIVE;
 		if(confined[partitionUid].expirationDate > now) {
 			confined[partitionUid].expirationDate = now;
@@ -402,7 +407,7 @@ contract ERC1400 {
 
 
 	/**
-	* stop the Option Exercise on a Partition by escrow account or after expiration of the exercise 
+	* stop the Option Exercise on a Partition by escrow account or after expiration of the exercise
 	**/
 
 	function stopOptionByPromisor(uint256 partitionUid) public returns (bool) {
@@ -438,7 +443,7 @@ contract ERC1400 {
 
 	function escrowTransfer(address seller, uint256 price, uint256 partitionUid) public{
 		require(tx.origin == confined[partitionUid].recipient);
-		
+
 		require(holders[msg.sender].status == holderStates.STATUS_ESCROW);
 		require(holders[seller].status == holderStates.STATUS_HOLDER);
 		require(holders[tx.origin].status == holderStates.STATUS_HOLDER);
