@@ -117,7 +117,7 @@ ERC1400[0].balanceOf(acc2)
 # Alice (account#1) initie un avis de vente :
 #	- destiné à Bob (account#2)
 #	- au prix de 8 tokens (> au montant du total des partitions de 5 tokens)
-#	- la durée de l'avis de vente est de 2 jours
+#	- la durée de l'avis de vente est de 2 heures (120 minutes)
 
 # account#0 enregistre l'adresse du smart contract clauseSellorbuy comme séquestre sur le contract ERC1400
 ERC1400[0].registerEscrow(clauseSellorbuy[0].address, {'from':acc0})
@@ -134,7 +134,7 @@ ERC1400[0].approveEscrow(clauseSellorbuy[0].address, 5678, 3, {'from':acc1})
 ERC20FixedSupply[0].approve(clauseSellorbuy[0].address, 3, {'from':acc1})
 
 # Alice lance de l'avis de vente
-clauseSellorbuy[0].startSellorbuy(acc2, 8, 2, {'from':acc1})
+clauseSellorbuy[0].startSellorbuy(acc2, 8, 120, {'from':acc1})
 
 clauseSellorbuy[0].notices(acc2)
 ### out : ("0xF800DeBE778aA16295AEF005db9c85aD4293DfA0", "0x034C935853f5cbE76169d5c643Ac0657fDC50DFf", 8, 1611089836, 1)
@@ -181,7 +181,7 @@ ERC1400[0].buyPartition(8888, 10, {'from':acc2})
 
 # Alice (account#1) initie un avis de vente :
 #	- destiné à Bob (account#2)
-#	- au prix de 8 tokens (> au montant du total des partitions de 5 tokens)
+#	- au prix de 12 tokens (> au montant du total des partitions de 12 tokens)
 #	- la durée de l'avis de vente est de 2 jours
 
 # Alice autorise le contract clauseSellorbuy à modifier le status de ses partitions
@@ -194,10 +194,57 @@ ERC1400[0].approveEscrow(clauseSellorbuy[0].address, 8765, 3, {'from':acc1})
 ERC20FixedSupply[0].approve(clauseSellorbuy[0].address, 2, {'from':acc1})
 
 # Alice lance de l'avis de vente
-clauseSellorbuy[0].startSellorbuy(acc2, 12, 2, {'from':acc1})
+clauseSellorbuy[0].startSellorbuy(acc2, 12, 120, {'from':acc1})
 
-# Bob autorise le contrat clauseSellorbuy à débiter son compte
+# Bob autorise le contrat clauseSellorbuy à débiter son compte de 2 tokens
 ERC20FixedSupply[0].approve(clauseSellorbuy[0].address, 2, {'from':acc2})
 
 # Bob indique son refus de vendre ses partitions et achète celles d'Alice
 clauseSellorbuy[0].remainerDeny({'from':acc2})
+
+ERC1400[0].partitionsOf(acc2)
+### out : (0, 0, 8888, 1234, 5678, 4321, 8765)
+
+
+######################
+# Test controllerForce
+######################
+
+# account#1 autorise le contract ERC1400 à débiter son compte de 20 tokens
+ERC20FixedSupply[0].approve(ERC1400[0].address, 20, {'from':acc1})
+ERC20FixedSupply[0].allowance(acc1, ERC1400[0].address)
+### out : 5
+
+# Alice (account#1) achète une partition ERC1400 de 20 tokens
+ERC1400[0].buyPartition(9999, 20, {'from':acc1})
+
+# Alice (account#1) initie un avis de vente :
+#	- destiné à Bob (account#2)
+#	- au prix de 20 tokens (= au montant du total des partitions de 20 tokens)
+#	- la durée de l'avis de vente est de 1 minute
+
+# Alice autorise le contract clauseSellorbuy à modifier le status de ses partitions
+ERC1400[0].approveEscrow(clauseSellorbuy[0].address, 9999, 20, {'from':acc1})
+
+# Alice lance de l'avis de vente
+clauseSellorbuy[0].startSellorbuy(acc2, 20, 1, {'from':acc1})
+
+# Le controller est enregistré sur le contract ERC1400
+acc9 = accounts.load('acc9')  # Controller
+
+# transfer 20 tokens vers account#9 (Controller)
+ERC20FixedSupply[0].transfer(acc9, 20)
+ERC20FixedSupply[0].balanceOf(acc9)
+
+# account#9 s'enregistre sur le contract ERC1400
+ERC1400[0].registerAccount({'from':acc9})
+ERC1400[0].holders(acc9)
+### out : (0, 0)
+
+# Enregistrement de account#9 comme Controller
+ERC1400[0].registerController(acc9)
+ERC1400[0].holders(acc9)
+### out : (0,1)
+
+# Controller force le transfert des partitions de Bob après l'expiration de l'avis de vente (1 minutes)
+clauseSellorbuy[0].controllerForce(acc2, {'from':acc9})

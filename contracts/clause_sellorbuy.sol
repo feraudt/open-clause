@@ -57,7 +57,7 @@ contract clauseSellorbuy {
 		uidList = tokenStock.partitionsOf(remainer);
 
 		for(i=0; i<nbPartition; i++) {
-			require(tokenStock.getPartitionStatus(uidList[i]) != 1, "Les partitions ne doivent être STATUS_CONFINED, soit 1");
+			require(tokenStock.getPartitionStatus(uidList[i]) != 1, "Les partitions ne doivent pas être STATUS_CONFINED, soit 1");
 		}
 
 		require(pricePurchase >= tokenStock.balanceOf(remainer), "Le prix de l'exercice doit être supérieur ou égal à la valeur des partitions détenues par l'actionnaire restant (remainer)");
@@ -67,11 +67,13 @@ contract clauseSellorbuy {
 
 		require(notices[remainer].status != sellorbuyStates.STATUS_PENDING, "Il ne peut pas y avoir un avis de vente en cours sur les partitions du remainer");
 		require(notices[msg.sender].status != sellorbuyStates.STATUS_PENDING, "Il ne peut pas y avoir un avis de vente en cours sur les partitions de l'actionnaire offrant (offerer)");
+		//TODO : require("la valeur des partitions de offerer et remainer doit être égale");
 
 		notices[remainer].offerer = msg.sender;
 		notices[remainer].remainer = remainer;
         notices[remainer].pricePurchase = pricePurchase;
-		notices[remainer].expirationDate = now + duration * 1 days;
+		//notices[remainer].expirationDate = now + duration * 1 minutes;
+		notices[remainer].expirationDate = now + duration * 1 minutes;
 		notices[remainer].status = sellorbuyStates.STATUS_PENDING;
 
 		// the offerer sends previously a transaction to ERC1400 to approve EscrowAccount on all its partitions (in case of remainer deny)
@@ -79,7 +81,9 @@ contract clauseSellorbuy {
 		uidList = tokenStock.partitionsOf(msg.sender);
 
 		for(i=0; i<nbPartition; i++) {
-			require(tokenStock.allowanceEscrow(msg.sender, address(this), uidList[i]) >= tokenStock.getPartitionAmount(uidList[i]), "le contract de séquestre doit être autorisé à modifier le status de toutes les partitions de l'actionnaire offrant (offerer)");
+			if(uidList[i] != 0) {
+				require(tokenStock.allowanceEscrow(msg.sender, address(this), uidList[i]) >= tokenStock.getPartitionAmount(uidList[i]), "le contract de séquestre doit être autorisé à modifier le status de toutes les partitions de l'actionnaire offrant (offerer)");
+			}
 		}
 
 		// the offerer sends previously a transaction to ERC20 to approve EscrowAccount for the transfer of the priceDelta (in case of remainer accept)
@@ -90,33 +94,19 @@ contract clauseSellorbuy {
 		// Transfer partitions[partitionUid].owner vers sequestre (address(this)) sur contract ERC1400
 		// changement status partition en CONFINED (pas de chgt de owner)
 		// mise à jour de la variable mapping escrows (fait sur le contract ERC1400)
-		uint256 endDate = now + duration * 1 days;
+		uint256 endDate = now + duration * 1 minutes;
 
 		//tokenStock.confinePartition(msg.sender, recipient, partitionUid, endDate, priceExercise);
-		// the promisor is the origin (msg.sender) of the transactions call
+		// the offerer is the origin (msg.sender) of the transactions call
 		for(i=0; i<nbPartition; i++) {
-			tokenStock.confinePartition(msg.sender, uidList[i], endDate, tokenStock.getPartitionAmount(uidList[i]));
+			if(uidList[i] != 0) {
+				tokenStock.confinePartition(msg.sender, uidList[i], endDate, tokenStock.getPartitionAmount(uidList[i]));
+			}
 		}
 
 		emit StartSellorbuy(msg.sender, remainer, address(this), pricePurchase, endDate);
 		return true;
 	}
-
-	// TODO : public for debug only - SHOULD be private
-	// function deconfine(address holder) private returns (bool){
-	// 	uint i;
-	// 	uint256 nbPartition;
-	// 	nbPartition = tokenStock.getHolderNbuid(holder);
-	// 	require(nbPartition > 0);
-	//
-	// 	uint256[] memory uidList = new uint256[](nbPartition);
-	// 	uidList = tokenStock.partitionsOf(holder);
-	//
-	// 	for(i=0; i<nbPartition; i++) {
-	// 		tokenStock.deconfinePartition(holder, uidList[i]);
-	// 	}
-	// 	return true;
-	// }
 
 
 	// The remainer accepts during the notice of sale duration
@@ -194,6 +184,14 @@ contract clauseSellorbuy {
 
 		for (i=0; i<nbPartition; i++) {
 			require(tokenStock.getPartitionStatus(uidList[i]) == 1, "les partitions de offerer doivent être en séquestre - STATUS_CONFINED is 1");
+		}
+
+		// on déconfine les partitions de offerer
+		uint nbPart = tokenStock.getHolderNbuid(offerer);
+		uint256 uidPart;
+		for(i=0; i<nbPart; i++) {
+			uidPart = tokenStock.getUid(offerer, i+1);
+			tokenStock.deconfinePartition(offerer, uidPart);
 		}
 
 		// le remainer doit avoir mis au préalable une allowance sur le contrat ERC20 pour permettre le paiement des partitions
