@@ -46,6 +46,11 @@ contract clauseSellorbuy {
 	// Sell or Buy functions
 	//------------------------------------------------------------
 
+	// get current time
+	function getCurrentTime() public view returns (uint256) {
+			return now;
+	}
+
 	// The offerer initiates the Notice of Sale on all the partitions of the remainer
 
 	function startSellorbuy(address remainer, uint256 pricePurchase, uint256 duration) public returns (bool){
@@ -67,7 +72,7 @@ contract clauseSellorbuy {
 
 		require(notices[remainer].status != sellorbuyStates.STATUS_PENDING, "Il ne peut pas y avoir un avis de vente en cours sur les partitions du remainer");
 		require(notices[msg.sender].status != sellorbuyStates.STATUS_PENDING, "Il ne peut pas y avoir un avis de vente en cours sur les partitions de l'actionnaire offrant (offerer)");
-		//TODO : require("la valeur des partitions de offerer et remainer doit être égale");
+		require(tokenStock.balanceOf(msg.sender) == tokenStock.balanceOf(remainer), "la valeur des partitions de offerer et remainer doit être égale");
 
 		notices[remainer].offerer = msg.sender;
 		notices[remainer].remainer = remainer;
@@ -199,7 +204,7 @@ contract clauseSellorbuy {
 		priceDelta = notices[msg.sender].pricePurchase - tokenStock.balanceOf(offerer);
 		require(tokenPayment.allowance(msg.sender, address(this)) >= priceDelta);
 
-		// Transfer des partitions au coût de pricePurchase de offerer vers msg.sender
+		// Transfer des partitions de offerer vers msg.sender
 		for(i=0; i<nbPartition; i++) {
 			require(tokenStock.allowanceEscrow(offerer, address(this), uidList[i]) >= tokenStock.getPartitionAmount(uidList[i]));
 			tokenStock.escrowExplicitTransfer(offerer, msg.sender, tokenStock.getPartitionAmount(uidList[i]), uidList[i]);
@@ -220,24 +225,31 @@ contract clauseSellorbuy {
 		require(now > notices[remainer].expirationDate);
 
 		// le offerer doit avoir positionné une allowance sur ERC20, sinon le transfert est effectué sur le compte du controller
+		address offerer = notices[remainer].offerer;
 		uint256 priceDelta;
-		priceDelta = notices[remainer].pricePurchase - tokenStock.balanceOf(remainer);
-		require(tokenPayment.allowance(remainer, address(this)) >= priceDelta);
+		priceDelta = notices[remainer].pricePurchase - tokenStock.balanceOf(offerer);
+		require(tokenPayment.allowance(offerer, address(this)) >= priceDelta);
 
-		// Le controller transfert les partitions de remainer vers offerer
+		// on déconfine les partitions de offerer
 		uint i=0;
 		uint256 nbPartition;
+		uint256 uidPartition;
+		nbPartition = tokenStock.getHolderNbuid(offerer);
+		for(i=0; i<nbPartition; i++) {
+			uidPartition = tokenStock.getUid(offerer, i+1);
+			if(uidPartition != 0) {
+				tokenStock.deconfinePartition(offerer, uidPartition);
+			}
+		}
+
+		// Le controller transfert les partitions de remainer vers offerer
 		nbPartition = tokenStock.getHolderNbuid(remainer);
 		require(nbPartition > 0);
-
-		uint256[] memory uidList = new uint256[](nbPartition);
-		uidList = tokenStock.partitionsOf(remainer);
-
 		for (i=0; i<nbPartition; i++) {
-			tokenStock.controllerTransfer(remainer, notices[remainer].offerer, tokenStock.getPartitionAmount(uidList[i]), uidList[i]);
-
-			// on déconfine les partitions de offerer
-			tokenStock.deconfinePartition(notices[remainer].offerer, uidList[i]);
+			uidPartition = tokenStock.getUid(remainer, i+1);
+			if(uidPartition != 0) {
+				tokenStock.controllerTransfer(remainer, offerer, uidPartition);
+			}
 		}
 
 		// l'avis de vente est clos

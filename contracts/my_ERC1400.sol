@@ -4,7 +4,7 @@ import "interfaces/my_IERC20.sol";
 
 contract ERC1400 {
 
-    address creator; // Developper account
+  address creator; // Developper account
 	bool isControl;
 	IERC20 tokenContract; // TokenContract managing payment
 
@@ -20,13 +20,13 @@ contract ERC1400 {
 		STATUS_ESCROW
 	}
 
-    // Represents a partially fungible tokens.
-    struct Partition {
+  // Represents a partially fungible tokens.
+  struct Partition {
 		address owner;
-        uint256 amount;
+    uint256 amount;
 		uint256 creation; // date de création
 		partitionStates status;
-    }
+  }
 
 	// Represents a holder of Partition
 	struct Holder {
@@ -42,21 +42,21 @@ contract ERC1400 {
 		address recipient;
 	}
 
-    // Mapping from partition UID
-    mapping (uint256 => Partition) public partitions;
+  // Mapping from partition UID
+  mapping (uint256 => Partition) public partitions;
 
-    // Mapping from investor to their partitions
-    mapping (address => mapping (uint256 => uint256)) public uids;
+  // Mapping from investor to their partitions
+  mapping (address => mapping (uint256 => uint256)) public uids;
 
-    // Mapping from investor (holder) to the number of partitions they own
-    mapping (address => Holder) public holders;
+  // Mapping from investor (holder) to the number of partitions they own
+  mapping (address => Holder) public holders;
 
 	// Mapping from partition UID to escrow status
 	mapping (uint256 => ConfinedPartition) public confined;
 
 
 	constructor(address _tokenContractAddress, bool _isControl) public {
-	    creator = msg.sender;
+	  creator = msg.sender;
 		isControl = _isControl;
 		tokenContract = IERC20(_tokenContractAddress);
 	}
@@ -65,25 +65,25 @@ contract ERC1400 {
 	// getter
 	//-------
 
-    function getPartitionOwner(uint256 partitionUid) public view returns (address) {
-        return partitions[partitionUid].owner;
-    }
+  function getPartitionOwner(uint256 partitionUid) public view returns (address) {
+      return partitions[partitionUid].owner;
+  }
 
-    function getPartitionStatus(uint256 partitionUid) public view returns (uint) {
-        return uint(partitions[partitionUid].status);
-    }
+  function getPartitionStatus(uint256 partitionUid) public view returns (uint) {
+      return uint(partitions[partitionUid].status);
+  }
 
-  	function getPartitionAmount(uint256 partitionUid) public view returns (uint) {
-        return uint(partitions[partitionUid].amount);
-    }
+	function getPartitionAmount(uint256 partitionUid) public view returns (uint) {
+      return uint(partitions[partitionUid].amount);
+  }
 
-  	function getHolderNbuid(address user) public view returns (uint) {
-        return uint(holders[user].nbUid);
-    }
+	function getHolderNbuid(address user) public view returns (uint) {
+      return uint(holders[user].nbUid);
+  }
 
-    function getUid(address user, uint index) public view returns (uint256) {
-        return uint(uids[user][index]);
-    }
+  function getUid(address user, uint index) public view returns (uint256) {
+      return uint(uids[user][index]);
+  }
 
 	//---------------------------------------------------------
 	// specifications ERC1410 - Partially Fungible Token events
@@ -95,14 +95,14 @@ contract ERC1400 {
 	// specifications ERC1410 - Partially Fungible Token functions
 	//------------------------------------------------------------
 
-    function partitionsOf(address owner) external view returns ( uint256[] memory ) {
+  function partitionsOf(address owner) external view returns ( uint256[] memory ) {
 		uint256[] memory uidList = new uint256[](holders[owner].nbUid);
 		for(uint i = 0; i < holders[owner].nbUid; i++) {
 			uidList[i] = uids[owner][i+1];
 		}
 
-        return uidList;
-    }
+    return uidList;
+  }
 
 	function balanceByPartition(uint256 partitionUid) external view returns ( uint256 ){
 		return partitions[partitionUid].amount;
@@ -208,8 +208,8 @@ contract ERC1400 {
 	function _transfertByPartition(uint256 partitionUid, address sender, address receiver, uint256 price) internal virtual {
 		require(tokenContract.balanceOf(receiver) >= price);
 		require(sender == partitions[partitionUid].owner);
-		//require(tokenContract.allowance(receiver, address(this)) >= price);
-		require(tokenContract.transferFrom(receiver, sender, price));  // price should be partitionIndex[partitionuid].amount
+		require(tokenContract.allowance(receiver, address(this)) >= price);
+		require(tokenContract.transferFrom(receiver, sender, price));  // price should be partitions[partitionuid].amount
 
 		partitions[partitionUid].owner = receiver;
 		holders[receiver].nbUid++;
@@ -265,12 +265,12 @@ contract ERC1400 {
 	}
 
 
-	function controllerTransfer(address seller, address receiver, uint256 price, uint256 partitionUid) public{
-		require(holders[msg.sender].status == holderStates.STATUS_CONTROLLER);
+	function controllerTransfer(address seller, address receiver, uint256 partitionUid) public{
+		require(holders[tx.origin].status == holderStates.STATUS_CONTROLLER);
 		require(holders[seller].status == holderStates.STATUS_HOLDER);
 		require(holders[receiver].status == holderStates.STATUS_HOLDER);
 
-		_transfertByPartition(partitionUid, seller, receiver, price);
+		_transfertByPartition(partitionUid, seller, receiver, partitions[partitionUid].amount);
 
 		//require(tokenContract.balanceOf(receiver) >= price);
 		//require(seller == partitions[partitionUid].owner);
@@ -290,14 +290,14 @@ contract ERC1400 {
 		//}
 		//uids[seller][j+1] = 0;
 
-		emit ControllerTransfer(msg.sender, seller, receiver, price, partitionUid);
+		emit ControllerTransfer(tx.origin, seller, receiver, partitions[partitionUid].amount, partitionUid);
 	}
 
-    function controllerRedeem(address seller, uint256 price, uint256 partitionUid) public{
-		require(holders[msg.sender].status == holderStates.STATUS_CONTROLLER);
+  function controllerRedeem(address seller, uint256 partitionUid) public{
+		require(holders[tx.origin].status == holderStates.STATUS_CONTROLLER);
 		require(holders[seller].status == holderStates.STATUS_HOLDER);
 
-		_transfertByPartition(partitionUid, seller, msg.sender, price);
+		_transfertByPartition(partitionUid, seller, tx.origin, partitions[partitionUid].amount);
 
 		//require(tokenContract.balanceOf(msg.sender) >= price);
 		//require(seller == partitions[partitionUid].owner);
@@ -317,7 +317,7 @@ contract ERC1400 {
 		//}
 		//uids[seller][j+1] = 0;
 
-		emit ControllerRedemption(msg.sender, seller, price, partitionUid);
+		emit ControllerRedemption(tx.origin, seller, partitions[partitionUid].amount, partitionUid);
 	}
 
 	//------------------------------------
@@ -374,7 +374,7 @@ contract ERC1400 {
 	* Confinement of a Partition for a given duration
 	**/
 
-		function confinePartition(address recipient, uint256 partitionUid, uint256 expirationDate, uint256 priceExercise) public returns (bool){
+	function confinePartition(address recipient, uint256 partitionUid, uint256 expirationDate, uint256 priceExercise) public returns (bool){
 		require(tx.origin == partitions[partitionUid].owner);
 		require(holders[msg.sender].status == holderStates.STATUS_ESCROW);
 		require(_allowanceEscrow[tx.origin][msg.sender][partitionUid] >= priceExercise, "le contract de séquestre doit être autorisé à modifier le status de la partition");

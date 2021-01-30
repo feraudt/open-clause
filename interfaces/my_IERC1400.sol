@@ -41,9 +41,9 @@ interface IERC1400 {
 
 	function isControllable() external view returns (bool);
 
-	function controllerTransfer(address sender, address receiver, uint256 price, uint256 partitionUid) external view;
+	function controllerTransfer(address sender, address receiver, uint256 partitionUid) external view;
 
-    function controllerRedeem(address sender, uint256 price, uint256 partitionUid) external view;
+    function controllerRedeem(address sender, uint256 partitionUid) external view;
 
 	//---------------------------------------
 	// addition to ERC1400 - Escrow functions
