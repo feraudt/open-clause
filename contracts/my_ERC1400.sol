@@ -209,7 +209,7 @@ contract ERC1400 {
 		require(tokenContract.balanceOf(receiver) >= price);
 		require(sender == partitions[partitionUid].owner);
 		require(tokenContract.allowance(receiver, address(this)) >= price);
-		require(tokenContract.transferFrom(receiver, sender, price));  // price should be partitions[partitionuid].amount
+		require(tokenContract.transferFrom(receiver, sender, price));
 
 		partitions[partitionUid].owner = receiver;
 		holders[receiver].nbUid++;
@@ -347,12 +347,12 @@ contract ERC1400 {
 	* Approve an escrow address for the transfer of a partition
 	**/
 	function approveEscrow(address escrow, uint256 partitionUid, uint256 price) public returns (bool){
-        require(escrow != address(0));
+    require(escrow != address(0));
 		require(price >= partitions[partitionUid].amount);
 		require(msg.sender == partitions[partitionUid].owner);
 
-        _allowanceEscrow[msg.sender][escrow][partitionUid] = price;
-        emit ApprovalEscrow(msg.sender, escrow, partitionUid, price);
+    _allowanceEscrow[msg.sender][escrow][partitionUid] = price;
+    emit ApprovalEscrow(msg.sender, escrow, partitionUid, price);
 		return true;
 	}
 
