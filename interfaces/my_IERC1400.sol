@@ -6,9 +6,11 @@ interface IERC1400 {
 
 	function getPartitionStatus(uint256 partitionUid) external view returns (uint);
 
-	function getPartitionAmount(uint256 partitionUid) external view returns (uint);
+	function getPartitionAmount(uint256 partitionUid) external view returns (uint256);
 
-	function getHolderNbuid(address user) external view returns (uint);
+	function getHolderNbuid(address user) external view returns (uint256);
+
+	function getHolderStatus(address user) external view returns (uint);
 
 	function getUid(address user, uint index) external view returns (uint256);
 
@@ -17,6 +19,7 @@ interface IERC1400 {
 	//------------------------------------------------------------
 
 	function registerAccount() external view;
+	function unRegisterAccount(address holder) external view;
 
 	function partitionsOf(address owner) external view returns ( uint256[] memory );
 
@@ -37,19 +40,20 @@ interface IERC1400 {
 
 	function registerController(address controller) external view;
 
-	function revokeController( address controller) external view;
+	function unRegisterController( address controller) external view;
 
 	function isControllable() external view returns (bool);
 
 	function controllerTransfer(address sender, address receiver, uint256 partitionUid) external view;
 
-    function controllerRedeem(address sender, uint256 partitionUid) external view;
+  function controllerRedeem(address sender, uint256 partitionUid) external view;
 
 	//---------------------------------------
 	// addition to ERC1400 - Escrow functions
 	//---------------------------------------
 
 	function registerEscrow(address escrow) external view returns (bool);
+	function unRegisterEscrow(address escrow) external view returns (bool);
 
 	function approveEscrow(address escrow, uint256 partitionUid, uint256 price) external view returns (bool);
 
@@ -65,6 +69,7 @@ interface IERC1400 {
 
 	function escrowTransfer(address seller, uint256 price, uint256 partitionUid) external;
 	function escrowExplicitTransfer(address seller, address recipient, uint256 price, uint256 partitionUid) external;
+	function escrowFreeTransfer(address recipient, uint256 price, uint256 partitionUid) external;
 
 	function whoIsOrigin() external returns (address);
 

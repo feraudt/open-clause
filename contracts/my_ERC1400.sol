@@ -14,10 +14,12 @@ contract ERC1400 {
 		STATUS_SOLD
 	}
 
+  // TODO : mettre un statut UNREGISTERED en position 0 car c'est utilisé par défaut
 	enum holderStates {
 		STATUS_HOLDER,
 		STATUS_CONTROLLER,
-		STATUS_ESCROW
+		STATUS_ESCROW,
+    STATUS_UNREGISTERED
 	}
 
   // Represents a partially fungible tokens.
@@ -73,12 +75,16 @@ contract ERC1400 {
       return uint(partitions[partitionUid].status);
   }
 
-	function getPartitionAmount(uint256 partitionUid) public view returns (uint) {
+	function getPartitionAmount(uint256 partitionUid) public view returns (uint256) {
       return uint(partitions[partitionUid].amount);
   }
 
-	function getHolderNbuid(address user) public view returns (uint) {
+	function getHolderNbuid(address user) public view returns (uint256) {
       return uint(holders[user].nbUid);
+  }
+
+  function getHolderStatus(address user) public view returns (uint) {
+      return uint(holders[user].status);
   }
 
   function getUid(address user, uint index) public view returns (uint256) {
@@ -127,6 +133,12 @@ contract ERC1400 {
 		holders[msg.sender].nbUid = 0;
 		holders[msg.sender].status = holderStates.STATUS_HOLDER;
 	}
+
+  function unRegisterAccount(address holder) public{
+    require(msg.sender == creator);
+    require(this.balanceOf(holder) == 0, "les partitions de holder doivent être soldées");
+    holders[holder].status = holderStates.STATUS_UNREGISTERED;
+  }
 
 	/**
 	* Buy a partition through TokenContract payment.
@@ -223,6 +235,8 @@ contract ERC1400 {
 			}
 		}
 		uids[sender][j+1] = 0;
+
+    decreaseAllowanceEscrow(sender, address(this), partitionUid, partitions[partitionUid].amount);
 	}
 
 
@@ -253,7 +267,7 @@ contract ERC1400 {
 	/**
 	* Revoke a controller
 	**/
-	function revokeController( address controller) public{
+	function unRegisterController( address controller) public{
 		require(msg.sender == creator);
 		require(holders[controller].status == holderStates.STATUS_CONTROLLER);
 
@@ -271,25 +285,6 @@ contract ERC1400 {
 		require(holders[receiver].status == holderStates.STATUS_HOLDER);
 
 		_transfertByPartition(partitionUid, seller, receiver, partitions[partitionUid].amount);
-
-		//require(tokenContract.balanceOf(receiver) >= price);
-		//require(seller == partitions[partitionUid].owner);
-		////require(tokenContract.allowance(receiver, address(this)) >= price);
-		//require(tokenContract.transferFrom(receiver, seller, price));  // price should be partitionIndex[partitionuid].amount
-
-		//partitions[partitionUid].owner = receiver;
-		//holders[receiver].nbUid++;
-		//uids[receiver][holders[receiver].nbUid] = partitionUid;
-
-		//uint j;
-		//for(uint i = 0; i < holders[seller].nbUid; i++) {
-		//	if(uids[seller][i+1] == partitionUid) {
-		//		j = i;
-		//		i = holders[seller].nbUid;
-		//	}
-		//}
-		//uids[seller][j+1] = 0;
-
 		emit ControllerTransfer(tx.origin, seller, receiver, partitions[partitionUid].amount, partitionUid);
 	}
 
@@ -298,25 +293,6 @@ contract ERC1400 {
 		require(holders[seller].status == holderStates.STATUS_HOLDER);
 
 		_transfertByPartition(partitionUid, seller, tx.origin, partitions[partitionUid].amount);
-
-		//require(tokenContract.balanceOf(msg.sender) >= price);
-		//require(seller == partitions[partitionUid].owner);
-		////require(tokenContract.allowance(receiver, address(this)) >= price);
-		//require(tokenContract.transferFrom(msg.sender, seller, price));  // price should be partitionIndex[partitionuid].amount
-
-		//partitions[partitionUid].owner = msg.sender;
-		//holders[msg.sender].nbUid++;
-		//uids[msg.sender][holders[msg.sender].nbUid] = partitionUid;
-
-		//uint j;
-		//for(uint i = 0; i < holders[seller].nbUid; i++) {
-		//	if(uids[seller][i+1] == partitionUid) {
-		//		j = i;
-		//		i = holders[seller].nbUid;
-		//	}
-		//}
-		//uids[seller][j+1] = 0;
-
 		emit ControllerRedemption(tx.origin, seller, partitions[partitionUid].amount, partitionUid);
 	}
 
@@ -343,6 +319,13 @@ contract ERC1400 {
 		return true;
 	}
 
+  function unRegisterEscrow(address escrow) public returns (bool){
+    require(msg.sender == creator);
+    require(holders[escrow].status == holderStates.STATUS_ESCROW);
+    holders[escrow].status = holderStates.STATUS_UNREGISTERED;
+    return true;
+  }
+
 	/**
 	* Approve an escrow address for the transfer of a partition
 	**/
@@ -362,6 +345,16 @@ contract ERC1400 {
 	function allowanceEscrow(address owner, address escrow, uint256 partitionUid) public returns (uint256){
 		return _allowanceEscrow[owner][escrow][partitionUid];
 	}
+
+  function decreaseAllowanceEscrow(address owner, address escrow, uint256 partitionUid, uint256 subAmount) private returns (bool) {
+    if( _allowanceEscrow[owner][escrow][partitionUid] >= subAmount ) {
+      _allowanceEscrow[owner][escrow][partitionUid] = _allowanceEscrow[owner][escrow][partitionUid] - subAmount;
+    }
+    else {
+      _allowanceEscrow[owner][escrow][partitionUid] = 0;
+    }
+    return true;
+  }
 
 	/**
 	* Get the message sender (help to debug)
@@ -456,7 +449,6 @@ contract ERC1400 {
 		emit EscrowTransfer(msg.sender, seller, tx.origin, price, partitionUid);
 	}
 
-
 	function escrowExplicitTransfer(address seller, address recipient, uint256 price, uint256 partitionUid) public{
 		require(holders[msg.sender].status == holderStates.STATUS_ESCROW);
 		require(holders[seller].status == holderStates.STATUS_HOLDER);
@@ -467,4 +459,15 @@ contract ERC1400 {
 
 		emit EscrowExplicitTransfer(msg.sender, seller, recipient, price, partitionUid);
 	}
+
+  function escrowFreeTransfer(address recipient, uint256 price, uint256 partitionUid) public{
+    require(tx.origin == partitions[partitionUid].owner);
+    require(holders[msg.sender].status == holderStates.STATUS_ESCROW);
+    require(holders[tx.origin].status == holderStates.STATUS_HOLDER);
+    require(holders[recipient].status == holderStates.STATUS_HOLDER);
+
+    _transfertByPartition(partitionUid, tx.origin, recipient, price);
+
+    emit EscrowTransfer(msg.sender, tx.origin, recipient, price, partitionUid);
+  }
 }
