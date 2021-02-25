@@ -37,7 +37,7 @@ end
 
 group registration Bob
 
-holder_Bob -> holder_Bob : unlock account#2
+holder_Bob -> holder_Bob : unlock account
 activate holder_Bob
 holder_Bob -> blockchain : register Bob as ERC1400 holder
 deactivate holder_Bob
