@@ -52,7 +52,7 @@ def test_erc20_transfer(acc1, acc2, ERC20FixedSupply):  # Transfert de ERC20 aux
 	ERC20FixedSupply.transfer(acc2, 20)
 	assert ERC20FixedSupply.balanceOf(acc1) == b1 + 20 and ERC20FixedSupply.balanceOf(acc2) == b2 + 20
 
-def test_allow_erc1400(acc1, ERC20FixedSupply, ERC1400):  # Autorisation de débit en ERC20 à Alice par ERC1400
+def test_allow_erc1400(acc1, ERC20FixedSupply, ERC1400):  # Autorisation pour ERC1400 de débiter Alice en ERC20
 	ERC20FixedSupply.approve(ERC1400.address, 5, {'from':acc1})
 	assert ERC20FixedSupply.allowance(acc1, ERC1400.address) == 5
 
