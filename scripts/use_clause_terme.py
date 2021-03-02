@@ -40,7 +40,7 @@ ERC1400[0].registerAccount({'from':acc2})
 ERC1400[0].holders(acc2)
 ### out : (0, 0)
 
-# account#0 enregistre l'adresse du smart contract clauseOption comme séquestre sur le contract ERC1400
+# account#0 enregistre l'adresse du smart contract clauseEscrow comme séquestre sur le contract ERC1400
 ERC1400[0].registerEscrow(clauseForward[0].address, {'from':acc0})
 
 ERC1400[0].holders(clauseForward[0].address)
@@ -94,7 +94,7 @@ ERC1400[0].balanceOf(acc1)
 # Alice (account#1) initie une vente à terme :
 #	- sur sa partition 1234
 #	- au bénéficiaire Bob (account#2)
-#	- pour un coût 3 tokens (en plus du montant de la partition)
+#	- pour un coût 3 tokens (en plus du montant de la partition de 2)
 #	- le terme est fixé à 2 minutes
 
 # Bob autorise le contract de vente à terme à débiter son compte de 3 tokens ERC20
