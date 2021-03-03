@@ -191,6 +191,11 @@ contract ERC20 is Context, IERC20 {
         return true;
     }
 
+    function decreaseAllowanceFrom(address owner, uint256 subtractedValue) public override virtual returns (bool) {
+        _approve(owner, msg.sender, _allowances[owner][msg.sender].sub(subtractedValue, "ERC20: decreased allowance below zero"));
+        return true;
+    }
+
     /**
      * @dev Moves tokens `amount` from `sender` to `recipient`.
      *

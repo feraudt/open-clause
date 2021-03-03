@@ -58,6 +58,7 @@ interface IERC1400 {
 	function approveEscrow(address escrow, uint256 partitionUid, uint256 price) external view returns (bool);
 
 	function allowanceEscrow(address owner, address escrow, uint256 partitionUid) external view returns (uint256);
+	function decreaseAllowanceEscrow(address owner, uint256 partitionUid, uint256 subAmount) external view returns (bool);
 
 	function whoissender() external returns (address);
 

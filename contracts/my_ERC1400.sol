@@ -236,7 +236,7 @@ contract ERC1400 {
 		}
 		uids[sender][j+1] = 0;
 
-    decreaseAllowanceEscrow(sender, address(this), partitionUid, partitions[partitionUid].amount);
+    decreaseAllowanceEscrow(sender, partitionUid, partitions[partitionUid].amount);
 	}
 
 
@@ -308,7 +308,7 @@ contract ERC1400 {
 	// addition to ERC1400 - Escrow functions
 	//---------------------------------------
 
-	mapping (address => mapping (address => mapping (uint256 => uint256))) private _allowanceEscrow;
+	mapping (address => mapping (address => mapping (uint256 => uint256))) public _allowanceEscrow;
 
 	/**
 	* Register an escrow address (this should be the caller smart contract address)
@@ -346,12 +346,13 @@ contract ERC1400 {
 		return _allowanceEscrow[owner][escrow][partitionUid];
 	}
 
-  function decreaseAllowanceEscrow(address owner, address escrow, uint256 partitionUid, uint256 subAmount) private returns (bool) {
-    if( _allowanceEscrow[owner][escrow][partitionUid] >= subAmount ) {
-      _allowanceEscrow[owner][escrow][partitionUid] = _allowanceEscrow[owner][escrow][partitionUid] - subAmount;
+  function decreaseAllowanceEscrow(address owner, uint256 partitionUid, uint256 subAmount) public returns (bool) {
+    // msg.sender is the escrow
+    if( _allowanceEscrow[owner][msg.sender][partitionUid] >= subAmount ) {
+      _allowanceEscrow[owner][msg.sender][partitionUid] = _allowanceEscrow[owner][msg.sender][partitionUid] - subAmount;
     }
     else {
-      _allowanceEscrow[owner][escrow][partitionUid] = 0;
+      _allowanceEscrow[owner][msg.sender][partitionUid] = 0;
     }
     return true;
   }

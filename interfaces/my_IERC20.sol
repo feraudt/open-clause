@@ -79,6 +79,7 @@ interface IERC20 {
 	 * ADDITION to the standard
 	 --------------------------*/
 
-    function burnFrom(address owner, uint256 amount) external returns(bool);
-    function mintFrom(address owner, uint256 amount) external returns(bool); 
+   function decreaseAllowanceFrom(address owner, uint256 subtractedValue) external returns (bool);
+   function burnFrom(address owner, uint256 amount) external returns (bool);
+   function mintFrom(address owner, uint256 amount) external returns (bool);
 }

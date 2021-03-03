@@ -13,7 +13,7 @@ contract clauseSellorbuy {
 	}
 
 	// Represents a notice of sale parameters
-    struct NoticeSale {
+  struct NoticeSale {
 		address offerer;    // actionnaire offrant
 		address remainer;   // actionnaire restant
 		uint256 pricePurchase;
@@ -21,14 +21,14 @@ contract clauseSellorbuy {
 		sellorbuyStates status;
     }
 
-    // Mapping from partition UID to Option
-    mapping ( address => NoticeSale ) public notices;
+  // Mapping from partition UID to Option
+  mapping ( address => NoticeSale ) public notices;
 
 	IERC1400 public tokenStock;   // token qui représente la partition (ERC1410)
 	IERC20 public tokenPayment;   // token qui représente le coin (ERC20)
 
 	constructor(address _tokenStockAddress, address _tokenPaymentAddress) public {
-	    require(_tokenStockAddress != address(0));
+	  require(_tokenStockAddress != address(0));
 		require(_tokenPaymentAddress != address(0));
 
 		tokenStock = IERC1400(_tokenStockAddress);
@@ -76,8 +76,7 @@ contract clauseSellorbuy {
 
 		notices[remainer].offerer = msg.sender;
 		notices[remainer].remainer = remainer;
-        notices[remainer].pricePurchase = pricePurchase;
-		//notices[remainer].expirationDate = now + duration * 1 minutes;
+    notices[remainer].pricePurchase = pricePurchase;
 		notices[remainer].expirationDate = now + duration * 1 minutes;
 		notices[remainer].status = sellorbuyStates.STATUS_PENDING;
 
@@ -223,6 +222,7 @@ contract clauseSellorbuy {
 	function controllerForce(address remainer) public returns (bool){
 		require(notices[remainer].status == sellorbuyStates.STATUS_PENDING);
 		require(now > notices[remainer].expirationDate);
+		require(tokenStock.getHolderStatus(tx.origin) == 1, "le compte originaire de la transaction doit être le controller");
 
 		// le offerer doit avoir positionné une allowance sur ERC20, sinon le transfert est effectué sur le compte du controller
 		address offerer = notices[remainer].offerer;
@@ -255,6 +255,36 @@ contract clauseSellorbuy {
 		// l'avis de vente est clos
 		notices[remainer].status = sellorbuyStates.STATUS_CLOSED;
 		return true;
+	}
+
+	// Le controller annule l'avis de vente
+	function controllerRemove(address remainer) public returns (bool){
+		require(tokenStock.getHolderStatus(tx.origin) == 1, "le compte originaire de la transaction doit être le controller");
+
+		// TODO : mettre à jour les allowance
+		// deconfine Alice partitions
+
+		// boucle sur les partitions de Alice (offerer)
+		uint i=0;
+		uint256 nbPartition;
+		uint256 uidPartition;
+		address offerer = notices[remainer].offerer;
+		nbPartition = tokenStock.getHolderNbuid(offerer);
+		for(i=0; i<nbPartition; i++) {
+			uidPartition = tokenStock.getUid(offerer, i+1);
+			if(uidPartition != 0) {
+				tokenStock.deconfinePartition(offerer, uidPartition);
+				//tokenStock.decreaseAllowanceEscrow(offerer, uidPartition, tokenStock.getPartitionAmount(uidPartition));
+			}
+		}
+
+		uint256 delta = notices[remainer].pricePurchase - tokenStock.balanceOf(remainer);
+		if (delta != 0) {
+			tokenPayment.decreaseAllowanceFrom(offerer, delta);
+		}
+
+		notices[remainer].expirationDate = now;
+		notices[remainer].status = sellorbuyStates.STATUS_CLOSED;
 	}
 
 }

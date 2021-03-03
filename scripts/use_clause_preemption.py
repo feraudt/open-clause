@@ -157,8 +157,8 @@ clausePreemption[0].preemptions(acc1, 0)
 ERC1400[0].partitions(1114)
 ### out : ("0xF800DeBE778aA16295AEF005db9c85aD4293DfA0", 2, 1613584969, 0)
 
-# Alice (account#1) initie un droit de preemption au bénéfice de Esther :
-#	- pour le bénéficiaire Esther (account#5)
+# Alice (account#1) initie un droit de preemption au bénéfice de Dave :
+#	- pour le bénéficiaire Dave (account#4)
 #	- la durée de la preemption est de 60 minutes
 
 # Alice lance la preemption au bénéfice de Esther
@@ -173,7 +173,7 @@ clausePreemption[0].preemptions(acc1, 1)
 #   - le coût de la preemption est de 2 tokens
 #	- la validité de l'avis est de 10 minutes
 
-# Alice autorise le contract de preemption à modifier le status de sa partition 1114
+# Alice autorise le contract de preemption à modifier le status de sa partition 114
 ERC1400[0].approveEscrow(clausePreemption[0].address, 1114, 2, {'from':acc1})
 
 # Alice notifie Dave de l'intention de vendre sa partition 1114
@@ -198,7 +198,7 @@ clausePreemption[0].responses(acc5, 1114)
 ### out : ("0xF800DeBE778aA16295AEF005db9c85aD4293DfA0", "0xfE9edba85a709f35E42Caed3b7697004b51754d4", 1114, 2, 1613653542, 1613656508, 1613652978, True)
 
 # Alice choisit de transférer sa partition à Dave
-# Dave autorise le contract clausePreemption à débiter son compte de 2 tokens ERC20 : c'est le coût de la preemption
+# Dave autorise le contract ERC1400 à débiter son compte de 2 tokens ERC20 : c'est le coût de la preemption
 ERC20FixedSupply[0].approve(clausePreemption[0].address, 2, {'from':acc4})
 # Dave autorise le contract ERC1400 à débiter son compte de 2 tokens ERC20 : c'est le coût de la partition 1114
 ERC20FixedSupply[0].approve(ERC1400[0].address, 2, {'from':acc4})
