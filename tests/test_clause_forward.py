@@ -27,7 +27,7 @@ def ERC1400(acc0, ERC20FixedSupply, ERC1400):
 
 @pytest.fixture(scope="module")
 def clauseForward(acc0, ERC20FixedSupply, ERC1400, clauseForward):
-    return clauseForward.deploy(ERC1400.address, ERC20FixedSupply.address, {'from':acc0})
+    return clauseForward.deploy(ERC1400.address, ERC20FixedSupply.address, {'from':acc0})  # Déploiement de clauseForward
 
 def test_address(clauseForward):
     print("clauseForward.address = ", clauseForward.address)
@@ -68,7 +68,7 @@ def test_buy_part_erc1400(acc1, ERC1400, ERC20FixedSupply):  # Achat d'une part 
     assert part[3] == 0
     assert ERC20FixedSupply.allowance(acc1, ERC1400.address) == a - 3
 
-def test_allow_sale(acc1, acc2, ERC20FixedSupply, ERC1400, clauseForward):
+def test_allow_sale(acc1, acc2, ERC20FixedSupply, ERC1400, clauseForward):  # Positionnement des autorisations requises
     af = ERC20FixedSupply.allowance(acc2, clauseForward.address)
     a1400 = ERC20FixedSupply.allowance(acc2, ERC1400)
     ERC1400.approveEscrow(clauseForward.address, 1234, 3, {'from':acc1})
@@ -77,7 +77,7 @@ def test_allow_sale(acc1, acc2, ERC20FixedSupply, ERC1400, clauseForward):
     assert ERC20FixedSupply.allowance(acc2, clauseForward.address) == af + 2
     assert ERC20FixedSupply.allowance(acc2, ERC1400.address) == a1400 + 3
 
-def test_start_sale(acc1, acc2, clauseForward):
+def test_start_sale(acc1, acc2, clauseForward):  # Lancement de l'avis de vente par Alice pour Bob
     clauseForward.startForwardSale(acc2, 1234, 2, 1, {'from':acc1})
     f = clauseForward.forwards(1234)
     assert f[0] == acc1.address
@@ -85,7 +85,7 @@ def test_start_sale(acc1, acc2, clauseForward):
     assert f[2] == 2
     assert f[4] == 1
 
-def test_launch_sale(acc2, clauseForward, ERC1400):
+def test_launch_sale(acc2, clauseForward, ERC1400):  # Attente du terme et vente effective de la partition
     time.sleep(61)
     clauseForward.launchSale(1234, {'from':acc2})
     assert clauseForward.forwards(1234)[4] == 2
