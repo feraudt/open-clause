@@ -70,8 +70,16 @@ ERC20FixedSupply[0].transfer(acc2, 20)
 ERC20FixedSupply[0].balanceOf(acc2)
 ### out : 20
 
+# initialisation des autorisations
+ERC20FixedSupply[0].approve(ERC1400[0].address, 0, {'from':acc1})
+ERC20FixedSupply[0].approve(ERC1400[0].address, 0, {'from':acc2})
+
+ERC20FixedSupply[0].approve(clauseOption[0].address, 0, {'from':acc1})
+ERC20FixedSupply[0].approve(clauseOption[0].address, 0, {'from':acc2})
+
+
 # account#1 autorise le contract ERC1400 à débiter son compte de 5 tokens
-ERC20FixedSupply[0].approve(ERC1400[0].address, 5, {'from':acc1})
+ERC20FixedSupply[0].increaseAllowance(ERC1400[0].address, 5, {'from':acc1})
 ERC20FixedSupply[0].allowance(acc1, ERC1400[0].address)
 ### out : 5
 
@@ -108,7 +116,7 @@ ERC1400[0].balanceOf(acc1)
 #	- la durée de l'option est de 2 jours
 
 # Bob autorise le contract d'option à débiter son compte de 1 tokens ERC20 : c'est le prix de l'option
-ERC20FixedSupply[0].approve(clauseOption[0].address, 1, {'from':acc2})
+ERC20FixedSupply[0].increaseAllowance(clauseOption[0].address, 1, {'from':acc2})
 
 # Alice autorise le contract d'option à modifier le status de sa partition
 ERC1400[0].approveEscrow(clauseOption[0].address, 1234, 3, {'from':acc1})
@@ -127,7 +135,7 @@ ERC1400[0].confined(1234)
 
 # -> dans la durée des deux jours, Bob accepte l'achat de la partition
 # Bob autorise le contract ERC1400 à débiter son compte de 4 tokens ERC20 : c'est le prix de l'exercice
-ERC20FixedSupply[0].approve(ERC1400[0].address, 3, {'from':acc2})
+ERC20FixedSupply[0].increaseAllowance(ERC1400[0].address, 3, {'from':acc2})
 
 # Bob indique son accord sur le contract d'option
 clauseOption[0].recipientAccept(1234, {'from':acc2})
@@ -150,7 +158,7 @@ ERC1400[0].confined(1234)
 #	- la durée de l'option est de 5 jours
 
 # Bob autorise le contract d'option à débiter son compte de 1 tokens ERC20 : c'est le prix de l'option
-ERC20FixedSupply[0].approve(clauseOption[0].address, 1, {'from':acc2})
+ERC20FixedSupply[0].increaseAllowance(clauseOption[0].address, 1, {'from':acc2})
 
 # Alice autorise le contract d'option à modifier le status de sa partition
 ERC1400[0].approveEscrow(clauseOption[0].address, 5678, 3, {'from':acc1})
@@ -170,13 +178,3 @@ ERC20FixedSupply[0].balanceOf(acc2)
 
 ERC1400[0].confined(5678)
 ### out : ("0x1BbDe47982ac6dEB4E752a4DFF32Cb70DF8e5C18", 1606862664, 3, "0x034C935853f5cbE76169d5c643Ac0657fDC50DFf")
-
-
-
-
-
-
-
-
-
-

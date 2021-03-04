@@ -65,6 +65,19 @@ ERC1400[0].registerEscrow(clausePreemption[0].address, {'from':acc0})
 ERC1400[0].holders(clausePreemption[0].address)
 ### out : (0, 2)
 
+# initialisation des autorisations
+ERC20FixedSupply[0].approve(ERC1400[0].address, 0, {'from':acc1})
+ERC20FixedSupply[0].approve(ERC1400[0].address, 0, {'from':acc2})
+ERC20FixedSupply[0].approve(ERC1400[0].address, 0, {'from':acc3})
+ERC20FixedSupply[0].approve(ERC1400[0].address, 0, {'from':acc4})
+ERC20FixedSupply[0].approve(ERC1400[0].address, 0, {'from':acc5})
+
+ERC20FixedSupply[0].approve(clausePreemption[0].address, 0, {'from':acc1})
+ERC20FixedSupply[0].approve(clausePreemption[0].address, 0, {'from':acc2})
+ERC20FixedSupply[0].approve(clausePreemption[0].address, 0, {'from':acc3})
+ERC20FixedSupply[0].approve(clausePreemption[0].address, 0, {'from':acc4})
+ERC20FixedSupply[0].approve(clausePreemption[0].address, 0, {'from':acc5})
+
 
 ###---------------------
 ### Achat des partitions
@@ -96,7 +109,7 @@ ERC20FixedSupply[0].balanceOf(acc5)
 ### out : 20
 
 # account#1 autorise le contract ERC1400 à débiter son compte de 5 tokens
-ERC20FixedSupply[0].approve(ERC1400[0].address, 5, {'from':acc1})
+ERC20FixedSupply[0].increaseAllowance(ERC1400[0].address, 5, {'from':acc1})
 ERC20FixedSupply[0].allowance(acc1, ERC1400[0].address)
 ### out : 5
 
@@ -120,22 +133,22 @@ ERC1400[0].balanceOf(acc1)
 ### out : 5
 
 # account#2 autorise le contract ERC1400 à débiter son compte de 5 tokens
-ERC20FixedSupply[0].approve(ERC1400[0].address, 5, {'from':acc2})
+ERC20FixedSupply[0].increaseAllowance(ERC1400[0].address, 5, {'from':acc2})
 ERC1400[0].buyPartition(2224, 2, {'from':acc2})
 ERC1400[0].buyPartition(2228, 3, {'from':acc2})
 
 # account#3 autorise le contract ERC1400 à débiter son compte de 5 tokens
-ERC20FixedSupply[0].approve(ERC1400[0].address, 5, {'from':acc3})
+ERC20FixedSupply[0].increaseAllowance(ERC1400[0].address, 5, {'from':acc3})
 ERC1400[0].buyPartition(3334, 2, {'from':acc3})
 ERC1400[0].buyPartition(3338, 3, {'from':acc3})
 
 # account#4 autorise le contract ERC1400 à débiter son compte de 5 tokens
-ERC20FixedSupply[0].approve(ERC1400[0].address, 5, {'from':acc4})
+ERC20FixedSupply[0].increaseAllowance(ERC1400[0].address, 5, {'from':acc4})
 ERC1400[0].buyPartition(4444, 2, {'from':acc4})
 ERC1400[0].buyPartition(4448, 3, {'from':acc4})
 
 # account#5 autorise le contract ERC1400 à débiter son compte de 5 tokens
-ERC20FixedSupply[0].approve(ERC1400[0].address, 5, {'from':acc5})
+ERC20FixedSupply[0].increaseAllowance(ERC1400[0].address, 5, {'from':acc5})
 ERC1400[0].buyPartition(5554, 2, {'from':acc5})
 ERC1400[0].buyPartition(5558, 3, {'from':acc5})
 
@@ -199,9 +212,9 @@ clausePreemption[0].responses(acc5, 1114)
 
 # Alice choisit de transférer sa partition à Dave
 # Dave autorise le contract ERC1400 à débiter son compte de 2 tokens ERC20 : c'est le coût de la preemption
-ERC20FixedSupply[0].approve(clausePreemption[0].address, 2, {'from':acc4})
+ERC20FixedSupply[0].increaseAllowance(clausePreemption[0].address, 2, {'from':acc4})
 # Dave autorise le contract ERC1400 à débiter son compte de 2 tokens ERC20 : c'est le coût de la partition 1114
-ERC20FixedSupply[0].approve(ERC1400[0].address, 2, {'from':acc4})
+ERC20FixedSupply[0].increaseAllowance(ERC1400[0].address, 2, {'from':acc4})
 
 clausePreemption[0].launchTransfer(acc4, 1114, {'from':acc1})
 
@@ -234,7 +247,7 @@ clausePreemption[0].responses(acc4, 1118)
 
 # Alice décide de vendre sa partition à Bob qui n'est pas un bénéficiaire
 # Bob autorise le contract ERC1400 à débiter son compte de 3 tokens ERC20 : c'est le coût de la partition 1118
-ERC20FixedSupply[0].approve(ERC1400[0].address, 3, {'from':acc2})
+ERC20FixedSupply[0].increaseAllowance(ERC1400[0].address, 3, {'from':acc2})
 
 ERC1400[0].transferByPartition(1118, acc2, 3, {'from':acc1})
 

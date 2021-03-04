@@ -132,6 +132,7 @@ contract ERC20 is Context, IERC20 {
      * - `spender` cannot be the zero address.
      */
     function approve(address spender, uint256 amount) public virtual override returns (bool) {
+        require(amount == 0, "initialisation de allowance a zero puis utilisation des methods increaseAllowance et decreaseAllowance");
         _approve(_msgSender(), spender, amount);
         return true;
     }
@@ -192,8 +193,9 @@ contract ERC20 is Context, IERC20 {
     }
 
     function decreaseAllowanceFrom(address owner, uint256 subtractedValue) public override virtual returns (bool) {
-        _approve(owner, msg.sender, _allowances[owner][msg.sender].sub(subtractedValue, "ERC20: decreased allowance below zero"));
-        return true;
+      require(_allowances[owner][msg.sender] >= subtractedValue);
+      _approve(owner, msg.sender, _allowances[owner][msg.sender].sub(subtractedValue, "ERC20: decreased allowance below zero"));
+      return true;
     }
 
     /**
@@ -315,6 +317,7 @@ contract ERC20 is Context, IERC20 {
 	function burnFrom(address owner, uint256 amount) public virtual override returns(bool) {
 		require(_allowances[owner][msg.sender] >= amount);  // msg.sender is a contract
 		_burn(owner, amount);
+    _approve(owner, msg.sender, _allowances[owner][msg.sender].sub(amount, "ERC20: decreased allowance below zero"));
 		return true;
 	}
 

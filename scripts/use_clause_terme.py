@@ -46,6 +46,13 @@ ERC1400[0].registerEscrow(clauseForward[0].address, {'from':acc0})
 ERC1400[0].holders(clauseForward[0].address)
 ### out : (0, 2)
 
+# initialisation des autorisations
+ERC20FixedSupply[0].approve(ERC1400[0].address, 0, {'from':acc1})
+ERC20FixedSupply[0].approve(ERC1400[0].address, 0, {'from':acc2})
+
+ERC20FixedSupply[0].approve(clauseForward[0].address, 0, {'from':acc1})
+ERC20FixedSupply[0].approve(clauseForward[0].address, 0, {'from':acc2})
+
 
 ###---------------------
 ### Achat des partitions
@@ -62,7 +69,7 @@ ERC20FixedSupply[0].balanceOf(acc2)
 ### out : 20
 
 # account#1 autorise le contract ERC1400 à débiter son compte de 5 tokens
-ERC20FixedSupply[0].approve(ERC1400[0].address, 5, {'from':acc1})
+ERC20FixedSupply[0].increaseAllowance(ERC1400[0].address, 5, {'from':acc1})
 ERC20FixedSupply[0].allowance(acc1, ERC1400[0].address)
 ### out : 5
 
@@ -98,10 +105,10 @@ ERC1400[0].balanceOf(acc1)
 #	- le terme est fixé à 2 minutes
 
 # Bob autorise le contract de vente à terme à débiter son compte de 3 tokens ERC20
-ERC20FixedSupply[0].approve(clauseForward[0].address, 3, {'from':acc2})
+ERC20FixedSupply[0].increaseAllowance(clauseForward[0].address, 3, {'from':acc2})
 
 # Bob autorise le contract ERC1400 à débiter son compte de 2 tokens ERC20
-ERC20FixedSupply[0].approve(ERC1400[0].address, 2, {'from':acc2})
+ERC20FixedSupply[0].increaseAllowance(ERC1400[0].address, 2, {'from':acc2})
 
 # Alice autorise le contract de vente à terme à modifier le status de sa partition
 ERC1400[0].approveEscrow(clauseForward[0].address, 1234, 2, {'from':acc1})

@@ -150,7 +150,7 @@ contract ERC1400 {
 		require(partitionUid != 0);
 		require(holders[msg.sender].status == holderStates.STATUS_HOLDER);
 		require(tokenContract.balanceOf(msg.sender) >= amount);
-		require(tokenContract.burnFrom(msg.sender, amount));
+    require(tokenContract.burnFrom(msg.sender, amount));
 
 		partitions[partitionUid].owner = msg.sender;
 		partitions[partitionUid].amount = amount;
@@ -236,7 +236,7 @@ contract ERC1400 {
 		}
 		uids[sender][j+1] = 0;
 
-    decreaseAllowanceEscrow(sender, partitionUid, partitions[partitionUid].amount);
+    //decreaseAllowanceEscrow(sender, partitionUid, partitions[partitionUid].amount);
 	}
 
 

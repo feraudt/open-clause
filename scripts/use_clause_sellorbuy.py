@@ -49,6 +49,13 @@ ERC1400[0].registerAccount({'from':acc2})
 ERC1400[0].holders(acc2)
 ### out : (0, 0)
 
+# initialisation des autorisations
+ERC20FixedSupply[0].approve(ERC1400[0].address, 0, {'from':acc1})
+ERC20FixedSupply[0].approve(ERC1400[0].address, 0, {'from':acc2})
+
+ERC20FixedSupply[0].approve(clauseSellorbuy[0].address, 0, {'from':acc1})
+ERC20FixedSupply[0].approve(clauseSellorbuy[0].address, 0, {'from':acc2})
+
 
 ###---------------------
 ### Achat des partitions
@@ -65,13 +72,18 @@ ERC20FixedSupply[0].balanceOf(acc2)
 ### out : 50
 
 # account#1 autorise le contract ERC1400 à débiter son compte de 5 tokens
-ERC20FixedSupply[0].approve(ERC1400[0].address, 5, {'from':acc1})
+ERC20FixedSupply[0].increaseAllowance(ERC1400[0].address, 5, {'from':acc1})
 ERC20FixedSupply[0].allowance(acc1, ERC1400[0].address)
 ### out : 5
 
 # account#1 achète deux partitions ERC1400, l'une de 2 tokens, l'autre de 3 tokens
 ERC1400[0].buyPartition(1234, 2, {'from':acc1})
+ERC20FixedSupply[0].allowance(acc1, ERC1400[0].address)
+### out : 3
+
 ERC1400[0].buyPartition(5678, 3, {'from':acc1})
+ERC20FixedSupply[0].allowance(acc1, ERC1400[0].address)
+### out : 0
 
 ERC1400[0].partitions(1234)
 ### out : ("0xF800DeBE778aA16295AEF005db9c85aD4293DfA0", 2, 1610915708, 0)
@@ -88,13 +100,16 @@ ERC1400[0].balanceOf(acc1)
 
 
 # account#2 autorise le contract ERC1400 à débiter son compte de 5 tokens
-ERC20FixedSupply[0].approve(ERC1400[0].address, 5, {'from':acc2})
+ERC20FixedSupply[0].increaseAllowance(ERC1400[0].address, 5, {'from':acc2})
 ERC20FixedSupply[0].allowance(acc2, ERC1400[0].address)
 ### out : 5
 
 # account#2 achète deux partitions ERC1400, l'une de 2 tokens, l'autre de 3 tokens
 ERC1400[0].buyPartition(4321, 2, {'from':acc2})
 ERC1400[0].buyPartition(8765, 3, {'from':acc2})
+
+ERC20FixedSupply[0].allowance(acc2, ERC1400[0].address)
+### out : 0
 
 ERC1400[0].partitions(4321)
 ### out : ("0x034C935853f5cbE76169d5c643Ac0657fDC50DFf", 2, 1610915899, 0)
@@ -131,7 +146,7 @@ ERC1400[0].approveEscrow(clauseSellorbuy[0].address, 1234, 2, {'from':acc1})
 ERC1400[0].approveEscrow(clauseSellorbuy[0].address, 5678, 3, {'from':acc1})
 
 # Alice autorise le contract ERC20 à débiter son compte du coût de l'avis de vente (8 tokens - 5 tokens correspondants à la valeur des partitions)
-ERC20FixedSupply[0].approve(clauseSellorbuy[0].address, 3, {'from':acc1})
+ERC20FixedSupply[0].increaseAllowance(clauseSellorbuy[0].address, 3, {'from':acc1})
 
 # Alice lance l'avis de vente
 clauseSellorbuy[0].startSellorbuy(acc2, 8, 120, {'from':acc1})
@@ -172,7 +187,7 @@ ERC1400[0].confined(1234)
 ###################
 
 # account#2 autorise le contract ERC1400 à débiter son compte de 10 tokens
-ERC20FixedSupply[0].approve(ERC1400[0].address, 10, {'from':acc2})
+ERC20FixedSupply[0].increaseAllowance(ERC1400[0].address, 10, {'from':acc2})
 ERC20FixedSupply[0].allowance(acc2, ERC1400[0].address)
 ### out : 5
 
@@ -191,13 +206,13 @@ ERC1400[0].approveEscrow(clauseSellorbuy[0].address, 4321, 2, {'from':acc1})
 ERC1400[0].approveEscrow(clauseSellorbuy[0].address, 8765, 3, {'from':acc1})
 
 # Alice autorise le contract ERC20 à débiter son compte du coût de l'avis de vente (12 tokens - 10 tokens correspondants à la valeur des partitions)
-ERC20FixedSupply[0].approve(clauseSellorbuy[0].address, 2, {'from':acc1})
+ERC20FixedSupply[0].increaseAllowance(clauseSellorbuy[0].address, 2, {'from':acc1})
 
 # Alice lance de l'avis de vente
 clauseSellorbuy[0].startSellorbuy(acc2, 12, 120, {'from':acc1})
 
 # Bob autorise le contrat clauseSellorbuy à débiter son compte de 2 tokens
-ERC20FixedSupply[0].approve(clauseSellorbuy[0].address, 2, {'from':acc2})
+ERC20FixedSupply[0].increaseAllowance(clauseSellorbuy[0].address, 2, {'from':acc2})
 
 # Bob indique son refus de vendre ses partitions et achète celles d'Alice
 clauseSellorbuy[0].remainerDeny({'from':acc2})
@@ -211,7 +226,7 @@ ERC1400[0].partitionsOf(acc2)
 ######################
 
 # account#1 autorise le contract ERC1400 à débiter son compte de 20 tokens
-ERC20FixedSupply[0].approve(ERC1400[0].address, 20, {'from':acc1})
+ERC20FixedSupply[0].increaseAllowance(ERC1400[0].address, 20, {'from':acc1})
 ERC20FixedSupply[0].allowance(acc1, ERC1400[0].address)
 ### out : 5
 
@@ -254,7 +269,7 @@ ERC20FixedSupply[0].allowance(acc1, clauseSellorbuy[0].address)
 
 ### NEW TO TEST : Alice autorise le contract ERC20 à débiter son compte du coût de la valeur des partitions)
 ### ToDo before launching Start method OU à construire autrement pour éviter qu'Alice donne un accord explicite (en cas de conflit)
-ERC20FixedSupply[0].approve(ERC1400[0].address, 20, {'from':acc1})
+ERC20FixedSupply[0].increaseAllowance(ERC1400[0].address, 20, {'from':acc1})
 
 # Controller force le transfert des partitions de Bob après l'expiration de l'avis de vente (1 minutes)
 clauseSellorbuy[0].controllerForce(acc2, {'from':acc9})
