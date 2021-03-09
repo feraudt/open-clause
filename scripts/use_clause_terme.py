@@ -111,7 +111,7 @@ ERC20FixedSupply[0].increaseAllowance(clauseForward[0].address, 3, {'from':acc2}
 ERC20FixedSupply[0].increaseAllowance(ERC1400[0].address, 2, {'from':acc2})
 
 # Alice autorise le contract de vente à terme à modifier le status de sa partition
-ERC1400[0].approveEscrow(clauseForward[0].address, 1234, 2, {'from':acc1})
+ERC1400[0].approveEscrow(clauseForward[0].address, 1234, {'from':acc1})
 
 # Alice initie la vente à terme
 clauseForward[0].startForwardSale(acc2, 1234, 3, 2, {'from':acc1})

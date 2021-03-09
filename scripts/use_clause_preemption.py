@@ -187,7 +187,7 @@ clausePreemption[0].preemptions(acc1, 1)
 #	- la validité de l'avis est de 10 minutes
 
 # Alice autorise le contract de preemption à modifier le status de sa partition 114
-ERC1400[0].approveEscrow(clausePreemption[0].address, 1114, 2, {'from':acc1})
+ERC1400[0].approveEscrow(clausePreemption[0].address, 1114, {'from':acc1})
 
 # Alice notifie Dave de l'intention de vendre sa partition 1114
 clausePreemption[0].launchNotice(acc4, 1114, 2, 10, {'from':acc1})
@@ -225,7 +225,7 @@ clausePreemption[0].launchTransfer(acc4, 1114, {'from':acc1})
 #	- la validité de l'avis est de 10 minutes
 
 # Alice autorise le contract de preemption à modifier le status de sa partition 114
-ERC1400[0].approveEscrow(clausePreemption[0].address, 1118, 3, {'from':acc1})
+ERC1400[0].approveEscrow(clausePreemption[0].address, 1118, {'from':acc1})
 
 # Alice notifie Dave de l'intention de vendre sa partition 1118
 clausePreemption[0].launchNotice(acc4, 1118, 2, 10, {'from':acc1})

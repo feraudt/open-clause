@@ -8,8 +8,8 @@ contract clauseOption {
 	// déclaration des différents états d'une option
 	enum optionStates {
 		STATUS_UNUSED,  // par défaut : 0
-		STATUS_PENDING,  
-		STATUS_CLOSED 
+		STATUS_PENDING,
+		STATUS_CLOSED
 	}
 
 	// Represents an option parameters
@@ -34,7 +34,7 @@ contract clauseOption {
 	//uint256 public priceOption;    // prix à payer par le bénéficiaire pour le droit d'option
 	//uint256 public expirationDate; // date après laquelle le bénéficiaire ne peut plus exercer son droit d'option
 
-	 
+
 	constructor(address _tokenStockAddress, address _tokenPaymentAddress) public {
 	    require(_tokenStockAddress != address(0));
 		require(_tokenPaymentAddress != address(0));
@@ -77,11 +77,11 @@ contract clauseOption {
 		options[partitionUid].status = optionStates.STATUS_PENDING;
 
 		// promisor send previously a transaction to ERC1400 to approve EscrowAccount on partitionUid for priceExercice
-		require(tokenStock.allowanceEscrow(msg.sender, address(this), partitionUid) >= priceExercise, "le contract de séquestre doit être autorisé à modifier le status de la partition");
+		require(tokenStock.allowanceEscrow(msg.sender, address(this), partitionUid) == true, "le contract de séquestre doit être autorisé à modifier le status de la partition");
 
 		// Transfer partitions[partitionUid].owner vers sequestre (address(this)) sur contract ERC1400
 		// changement status partition en CONFINED (pas de chgt de owner)
-		// mise à jour de la variable mapping escrows (fait sur le contract ERC1400)	
+		// mise à jour de la variable mapping escrows (fait sur le contract ERC1400)
 		uint256 endDate = now + duration * 1 days;
 		//tokenStock.confinePartition(msg.sender, recipient, partitionUid, endDate, priceExercise);
 		// the promisor is the origin (msg.sender) of the transactions call
@@ -106,11 +106,10 @@ contract clauseOption {
 		require(tokenStock.getPartitionStatus(partitionUid) == 1, "la partition cible de l'option doit être en séquestre - STATUS_CONFINED is 1");
 
 		// Transfer de la partition au coût de priceExercise
-		require(tokenStock.allowanceEscrow(options[partitionUid].promisor, address(this), partitionUid) >= options[partitionUid].priceExercise);
+		require(tokenStock.allowanceEscrow(options[partitionUid].promisor, address(this), partitionUid) == true);
 		// the recipient is the origin (msg.sender) of the transactions call
 		tokenStock.escrowTransfer(options[partitionUid].promisor, options[partitionUid].priceExercise, partitionUid);
 
-		//tokenStock.stopOptionExercise(partitionUid);
 		require(tokenStock.stopOptionByRecipient(partitionUid));
 		options[partitionUid].status = optionStates.STATUS_CLOSED;
 		return true;
@@ -148,4 +147,3 @@ contract clauseOption {
 		return tokenStock.whoIsOrigin();
 	}
 }
-

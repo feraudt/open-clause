@@ -67,7 +67,7 @@ contract clauseForward {
 		forwards[partitionUid].status = forwardStates.STATUS_PENDING;
 
 		// the seller sends previously a transaction to ERC1400 to approve EscrowAccount on partitionUid for priceExercice
-		require(tokenStock.allowanceEscrow(msg.sender, address(this), partitionUid) >= tokenStock.getPartitionAmount(partitionUid), "le contract de séquestre doit être autorisé à modifier le status de la partition");
+		require(tokenStock.allowanceEscrow(msg.sender, address(this), partitionUid) == true, "le contract de séquestre doit être autorisé à modifier le status de la partition");
 
 		// Transfer partitions[partitionUid].owner vers sequestre (address(this)) sur contract ERC1400
 		// changement status partition en CONFINED (pas de chgt de owner)
@@ -96,7 +96,7 @@ contract clauseForward {
 		tokenPayment.transferFrom(forwards[partitionUid].recipient, forwards[partitionUid].seller, forwards[partitionUid].priceForward);
 
 		// Transfer de la partition
-		require(tokenStock.allowanceEscrow(forwards[partitionUid].seller, address(this), partitionUid) >= tokenStock.getPartitionAmount(partitionUid));
+		require(tokenStock.allowanceEscrow(forwards[partitionUid].seller, address(this), partitionUid) == true);
 		tokenStock.escrowExplicitTransfer(forwards[partitionUid].seller, forwards[partitionUid].recipient, tokenStock.getPartitionAmount(partitionUid), partitionUid);
 
 		forwards[partitionUid].status = forwardStates.STATUS_CLOSED;

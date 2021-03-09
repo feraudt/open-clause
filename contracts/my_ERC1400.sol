@@ -235,8 +235,6 @@ contract ERC1400 {
 			}
 		}
 		uids[sender][j+1] = 0;
-
-    //decreaseAllowanceEscrow(sender, partitionUid, partitions[partitionUid].amount);
 	}
 
 
@@ -300,7 +298,6 @@ contract ERC1400 {
 	// addition to ERC1400 - Escrow events
 	//------------------------------------
 
-	event ApprovalEscrow(address owner, address escrow, uint256 partitionUid, uint256 price);
 	event EscrowTransfer(address escrow, address seller, address receiver, uint256 price, uint256 partitionUid);
 	event EscrowExplicitTransfer(address escrow, address seller, address recipient, uint256 price, uint256 partitionUid);
 
@@ -308,7 +305,7 @@ contract ERC1400 {
 	// addition to ERC1400 - Escrow functions
 	//---------------------------------------
 
-	mapping (address => mapping (address => mapping (uint256 => uint256))) public _allowanceEscrow;
+	mapping (address => mapping (address => mapping (uint256 => bool))) public _allowanceEscrow;
 
 	/**
 	* Register an escrow address (this should be the caller smart contract address)
@@ -329,33 +326,20 @@ contract ERC1400 {
 	/**
 	* Approve an escrow address for the transfer of a partition
 	**/
-	function approveEscrow(address escrow, uint256 partitionUid, uint256 price) public returns (bool){
+	function approveEscrow(address escrow, uint256 partitionUid) public returns (bool){
     require(escrow != address(0));
-		require(price >= partitions[partitionUid].amount);
 		require(msg.sender == partitions[partitionUid].owner);
 
-    _allowanceEscrow[msg.sender][escrow][partitionUid] = price;
-    emit ApprovalEscrow(msg.sender, escrow, partitionUid, price);
+    _allowanceEscrow[msg.sender][escrow][partitionUid] = true;
 		return true;
 	}
 
 	/**
 	* Allowance given to an escrow address on a partition
 	**/
-	function allowanceEscrow(address owner, address escrow, uint256 partitionUid) public returns (uint256){
+	function allowanceEscrow(address owner, address escrow, uint256 partitionUid) public returns (bool){
 		return _allowanceEscrow[owner][escrow][partitionUid];
 	}
-
-  function decreaseAllowanceEscrow(address owner, uint256 partitionUid, uint256 subAmount) public returns (bool) {
-    // msg.sender is the escrow
-    if( _allowanceEscrow[owner][msg.sender][partitionUid] >= subAmount ) {
-      _allowanceEscrow[owner][msg.sender][partitionUid] = _allowanceEscrow[owner][msg.sender][partitionUid] - subAmount;
-    }
-    else {
-      _allowanceEscrow[owner][msg.sender][partitionUid] = 0;
-    }
-    return true;
-  }
 
 	/**
 	* Get the message sender (help to debug)
@@ -371,7 +355,7 @@ contract ERC1400 {
 	function confinePartition(address recipient, uint256 partitionUid, uint256 expirationDate, uint256 priceExercise) public returns (bool){
 		require(tx.origin == partitions[partitionUid].owner);
 		require(holders[msg.sender].status == holderStates.STATUS_ESCROW);
-		require(_allowanceEscrow[tx.origin][msg.sender][partitionUid] >= priceExercise, "le contract de séquestre doit être autorisé à modifier le status de la partition");
+		require(_allowanceEscrow[tx.origin][msg.sender][partitionUid] == true, "le contract de séquestre doit être autorisé à modifier le status de la partition");
 
 		partitions[partitionUid].status = partitionStates.STATUS_CONFINED;
 		confined[partitionUid].escrow = msg.sender;
@@ -390,11 +374,12 @@ contract ERC1400 {
     require(partitions[partitionUid].owner == recipient, "le recipient est le propriétaire de la partition");
 		//require(partitions[partitionUid].status == partitionStates.STATUS_CONFINED, "la partition doit être confinée");
 		require(holders[msg.sender].status == holderStates.STATUS_ESCROW, "la transaction doit être émise depuis un compte de séquestre");
-    //require(_allowanceEscrow[recipient][msg.sender][partitionUid] >= partitions[partitionUid].amount, "le contract Escrow doit être autorisé à modifier le status de la partition");
+    require(_allowanceEscrow[recipient][msg.sender][partitionUid] == true, "le contract Escrow doit être autorisé à modifier le status de la partition");
 
 		partitions[partitionUid].status = partitionStates.STATUS_ACTIVE;
 		if(confined[partitionUid].expirationDate > now) {
 			confined[partitionUid].expirationDate = now;
+    _allowanceEscrow[recipient][msg.sender][partitionUid] = false;
 		}
 		return true;
 	}
@@ -410,9 +395,9 @@ contract ERC1400 {
 		require(msg.sender == confined[partitionUid].escrow);
 		require(tx.origin == partitions[partitionUid].owner);
 		require(partitions[partitionUid].status == partitionStates.STATUS_CONFINED);
-		_allowanceEscrow[partitions[partitionUid].owner][msg.sender][partitionUid] = 0;
-
 		require(now > confined[partitionUid].expirationDate);
+
+    _allowanceEscrow[tx.origin][msg.sender][partitionUid] = false;
 		partitions[partitionUid].status = partitionStates.STATUS_ACTIVE;
 		return true;
 	}
@@ -423,9 +408,9 @@ contract ERC1400 {
 		require(msg.sender == confined[partitionUid].escrow);
 		require(tx.origin == confined[partitionUid].recipient);
 		require(partitions[partitionUid].status == partitionStates.STATUS_CONFINED);
-		_allowanceEscrow[partitions[partitionUid].owner][msg.sender][partitionUid] = 0;
-
 		require(now <= confined[partitionUid].expirationDate);
+
+    _allowanceEscrow[partitions[partitionUid].owner][msg.sender][partitionUid] = false;
 		partitions[partitionUid].status = partitionStates.STATUS_ACTIVE;
 		confined[partitionUid].expirationDate = now;
 		return true;
@@ -457,6 +442,7 @@ contract ERC1400 {
 		require(seller == partitions[partitionUid].owner);
 
 		_transfertByPartition(partitionUid, seller, recipient, price);
+    _allowanceEscrow[seller][msg.sender][partitionUid] = false;
 
 		emit EscrowExplicitTransfer(msg.sender, seller, recipient, price, partitionUid);
 	}
@@ -468,6 +454,7 @@ contract ERC1400 {
     require(holders[recipient].status == holderStates.STATUS_HOLDER);
 
     _transfertByPartition(partitionUid, tx.origin, recipient, price);
+    _allowanceEscrow[tx.origin][msg.sender][partitionUid] = false;
 
     emit EscrowTransfer(msg.sender, tx.origin, recipient, price, partitionUid);
   }

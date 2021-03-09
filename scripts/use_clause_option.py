@@ -119,7 +119,10 @@ ERC1400[0].balanceOf(acc1)
 ERC20FixedSupply[0].increaseAllowance(clauseOption[0].address, 1, {'from':acc2})
 
 # Alice autorise le contract d'option à modifier le status de sa partition
-ERC1400[0].approveEscrow(clauseOption[0].address, 1234, 3, {'from':acc1})
+ERC1400[0].approveEscrow(clauseOption[0].address, 1234, {'from':acc1})
+
+ERC1400[0]._allowanceEscrow(acc1, clauseOption[0].address, 1234)
+### out : SHOULD BE true
 
 # Alice lance de l'Option
 clauseOption[0].startOption(acc2, 1234, 3, 1, 2, {'from':acc1})
@@ -134,7 +137,7 @@ ERC1400[0].confined(1234)
 ### out : ("0x1BbDe47982ac6dEB4E752a4DFF32Cb70DF8e5C18", 1606852265, 3)
 
 # -> dans la durée des deux jours, Bob accepte l'achat de la partition
-# Bob autorise le contract ERC1400 à débiter son compte de 4 tokens ERC20 : c'est le prix de l'exercice
+# Bob autorise le contract ERC1400 à débiter son compte de 3 tokens ERC20 : c'est le prix de l'exercice
 ERC20FixedSupply[0].increaseAllowance(ERC1400[0].address, 3, {'from':acc2})
 
 # Bob indique son accord sur le contract d'option
@@ -149,6 +152,9 @@ ERC20FixedSupply[0].balanceOf(acc2)
 ERC1400[0].confined(1234)
 ### out : ("0x1BbDe47982ac6dEB4E752a4DFF32Cb70DF8e5C18", 1606861993, 3, "0x034C935853f5cbE76169d5c643Ac0657fDC50DFf")
 
+ERC1400[0]._allowanceEscrow(acc1, clauseOption[0].address, 1234)
+### out : SHOULD BE false
+
 
 # Alice (account#1) initie un droit d'option :
 #	- sur sa partition 5678
@@ -161,7 +167,10 @@ ERC1400[0].confined(1234)
 ERC20FixedSupply[0].increaseAllowance(clauseOption[0].address, 1, {'from':acc2})
 
 # Alice autorise le contract d'option à modifier le status de sa partition
-ERC1400[0].approveEscrow(clauseOption[0].address, 5678, 3, {'from':acc1})
+ERC1400[0].approveEscrow(clauseOption[0].address, 5678, {'from':acc1})
+
+ERC1400[0]._allowanceEscrow(acc1, clauseOption[0].address, 5678)
+### out : SHOULD BE true
 
 # Alice lance de l'Option
 clauseOption[0].startOption(acc2, 5678, 3, 1, 5, {'from':acc1})
@@ -178,3 +187,6 @@ ERC20FixedSupply[0].balanceOf(acc2)
 
 ERC1400[0].confined(5678)
 ### out : ("0x1BbDe47982ac6dEB4E752a4DFF32Cb70DF8e5C18", 1606862664, 3, "0x034C935853f5cbE76169d5c643Ac0657fDC50DFf")
+
+ERC1400[0]._allowanceEscrow(acc1, clauseOption[0].address, 5678)
+### out : SHOULD BE false

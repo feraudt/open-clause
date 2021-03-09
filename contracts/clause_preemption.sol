@@ -94,7 +94,7 @@ contract clausePreemption {
 			}
 		}
 		require(preemptions[msg.sender][j].expirationDate > now);
-		require(tokenStock.allowanceEscrow(msg.sender, address(this), partitionUid) >= tokenStock.getPartitionAmount(partitionUid) );
+		require(tokenStock.allowanceEscrow(msg.sender, address(this), partitionUid) == true);
 
 		responses[recipient][partitionUid].promisor = msg.sender;
 		responses[recipient][partitionUid].recipient = recipient;
@@ -123,7 +123,7 @@ contract clausePreemption {
 		require(now >= responses[recipient][partitionUid].decisionDate, "now est postérieur à responses.decisionDate");
 		require(tokenStock.getPartitionOwner(partitionUid) == msg.sender, "msg.sender doit être le owner de la partition");
 		require(responses[recipient][partitionUid].decision == true, "le recipient doit être bénéficiaire et avoir notifié une décision positive");
-		require(tokenStock.allowanceEscrow(msg.sender, address(this), partitionUid) >= tokenStock.getPartitionAmount(partitionUid), "msg.sender a positionné une allowance à this sur la partition");
+		require(tokenStock.allowanceEscrow(msg.sender, address(this), partitionUid) == true, "msg.sender a positionné une allowance à this sur la partition");
 		require(tokenPayment.allowance(recipient, address(this)) >= responses[recipient][partitionUid].pricePreemption, "le recipient a positionné une allowance à this pour le coût de la préemption");
 		//require("le recipient a positionné une allowance à ERC1400 pour le coût de la partition");
 

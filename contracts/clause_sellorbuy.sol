@@ -86,7 +86,7 @@ contract clauseSellorbuy {
 
 		for(i=0; i<nbPartition; i++) {
 			if(uidList[i] != 0) {
-				require(tokenStock.allowanceEscrow(msg.sender, address(this), uidList[i]) >= tokenStock.getPartitionAmount(uidList[i]), "le contract de séquestre doit être autorisé à modifier le status de toutes les partitions de l'actionnaire offrant (offerer)");
+				require(tokenStock.allowanceEscrow(msg.sender, address(this), uidList[i]) == true, "le contract de séquestre doit être autorisé à modifier le status de toutes les partitions de l'actionnaire offrant (offerer)");
 			}
 		}
 
@@ -138,7 +138,7 @@ contract clauseSellorbuy {
 
 		// Transfer des partitions au coût de pricePurchase de msg.sender vers offerer
 		for(i=0; i<nbPartition; i++) {
-			require(tokenStock.allowanceEscrow(msg.sender, address(this), uidList[i]) >= tokenStock.getPartitionAmount(uidList[i]));
+			require(tokenStock.allowanceEscrow(msg.sender, address(this), uidList[i]) == true);
 			tokenStock.escrowExplicitTransfer(msg.sender, offerer, tokenStock.getPartitionAmount(uidList[i]), uidList[i]);
 		}
 
@@ -146,15 +146,6 @@ contract clauseSellorbuy {
 		notices[msg.sender].status = sellorbuyStates.STATUS_CLOSED;
 
 		// on déconfine les partitions de offerer
-		// nbPartition = tokenStock.getHolderNbuid(offerer);
-		// require(nbPartition > 0);
-		// uidList = tokenStock.partitionsOf(offerer);
-		//
-		// for(i=0; i<nbPartition; i++) {
-		// 	tokenStock.deconfinePartition(offerer, uidList[i]);
-		// }
-
-		//tokenStock.deconfinePartition(offerer, 1234);
 		uint nbPart = tokenStock.getHolderNbuid(offerer);
 		uint256 uidPart;
 		for(i=0; i<nbPart; i++) {
@@ -205,7 +196,7 @@ contract clauseSellorbuy {
 
 		// Transfer des partitions de offerer vers msg.sender
 		for(i=0; i<nbPartition; i++) {
-			require(tokenStock.allowanceEscrow(offerer, address(this), uidList[i]) >= tokenStock.getPartitionAmount(uidList[i]));
+			require(tokenStock.allowanceEscrow(offerer, address(this), uidList[i]) == true);
 			tokenStock.escrowExplicitTransfer(offerer, msg.sender, tokenStock.getPartitionAmount(uidList[i]), uidList[i]);
 		}
 
@@ -261,9 +252,6 @@ contract clauseSellorbuy {
 	function controllerRemove(address remainer) public returns (bool){
 		require(tokenStock.getHolderStatus(tx.origin) == 1, "le compte originaire de la transaction doit être le controller");
 
-		// TODO : mettre à jour les allowance
-		// deconfine Alice partitions
-
 		// boucle sur les partitions de Alice (offerer)
 		uint i=0;
 		uint256 nbPartition;
@@ -274,7 +262,6 @@ contract clauseSellorbuy {
 			uidPartition = tokenStock.getUid(offerer, i+1);
 			if(uidPartition != 0) {
 				tokenStock.deconfinePartition(offerer, uidPartition);
-				//tokenStock.decreaseAllowanceEscrow(offerer, uidPartition, tokenStock.getPartitionAmount(uidPartition));
 			}
 		}
 
