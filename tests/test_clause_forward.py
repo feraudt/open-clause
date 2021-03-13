@@ -32,7 +32,7 @@ def clauseForward(acc0, ERC20FixedSupply, ERC1400, clauseForward):
 def test_address(clauseForward):
     print("clauseForward.address = ", clauseForward.address)
 
-def test_register_holders(acc1, acc2, ERC1400):  #  Déclaration des utilisateurs à ERC1400
+def test_register_holders(acc1, acc2, ERC20FixedSupply, ERC1400):  #  Déclaration des utilisateurs à ERC1400
     ERC1400.registerAccount({'from':acc1})
     ERC1400.registerAccount({'from':acc2})
     ERC20FixedSupply.approve(ERC1400.address, 0, {'from':acc1})

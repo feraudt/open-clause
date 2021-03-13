@@ -132,7 +132,7 @@ contract ERC20 is Context, IERC20 {
      * - `spender` cannot be the zero address.
      */
     function approve(address spender, uint256 amount) public virtual override returns (bool) {
-        require(amount == 0, "initialisation de allowance a zero puis utilisation des methods increaseAllowance et decreaseAllowance");
+        require(amount == 0, "initialisation de allowance a zero puis utilisation des methodes increaseAllowance et decreaseAllowance");
         _approve(_msgSender(), spender, amount);
         return true;
     }

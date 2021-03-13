@@ -33,18 +33,14 @@ def ERC1400(acc0, ERC20FixedSupply, ERC1400):
 def clauseOption(acc0, ERC20FixedSupply, ERC1400, clauseOption):
 	return clauseOption.deploy(ERC1400.address, ERC20FixedSupply.address, {'from':acc0})  # Déploiement de clauseOption
 
-def test_address(clauseOption):
+def test_address(ERC1400, clauseOption):
+	print("ERC1400.address = ", ERC1400.address)
 	print("clauseOption.address = ", clauseOption.address)
 
 def test_register_holders(acc1, acc2, ERC1400):  #  Déclaration des utilisateurs à ERC1400
 	ERC1400.registerAccount({'from':acc1})
 	ERC1400.registerAccount({'from':acc2})
 	assert ERC1400.holders(acc1)[1] == 0 and ERC1400.holders(acc2)[1] == 0
-
-def test_init_allowance(acc1, acc2, ERC1400):
-	ERC20FixedSupply.approve(ERC1400.address, 0, {'from':acc1})
-	ERC20FixedSupply.approve(ERC1400.address, 0, {'from':acc2})
-	assert ERC20FixedSupply.allowance(acc1, ERC1400.address) == 0 and ERC20FixedSupply.allowance(acc2, ERC1400.address) == 0
 
 def test_register_escrow(acc0, ERC1400, clauseOption):  # Déclaration du séquestre à ERC1400
 	ERC1400.registerEscrow(clauseOption.address, {'from':acc0})
@@ -56,6 +52,11 @@ def test_erc20_transfer(acc1, acc2, ERC20FixedSupply):  # Transfert de ERC20 aux
 	ERC20FixedSupply.transfer(acc1, 20)
 	ERC20FixedSupply.transfer(acc2, 20)
 	assert ERC20FixedSupply.balanceOf(acc1) == b1 + 20 and ERC20FixedSupply.balanceOf(acc2) == b2 + 20
+
+def test_init_allowance(acc1, acc2, ERC20FixedSupply, ERC1400):
+	ERC20FixedSupply.approve(ERC1400.address, 0, {'from':acc1})
+	ERC20FixedSupply.approve(ERC1400.address, 0, {'from':acc2})
+	assert ERC20FixedSupply.allowance(acc1, ERC1400.address) == 0 and ERC20FixedSupply.allowance(acc2, ERC1400.address) == 0
 
 def test_allow_erc1400(acc1, ERC20FixedSupply, ERC1400):  # Autorisation pour ERC1400 de débiter Alice en ERC20
 	a = ERC20FixedSupply.allowance(acc1, ERC1400.address)

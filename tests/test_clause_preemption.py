@@ -41,7 +41,7 @@ def clausePreemption(acc0, ERC20FixedSupply, ERC1400, clausePreemption):
 def test_address(clausePreemption):
     print("clausePreemption.address = ", clausePreemption.address)
 
-def test_register_holders(acc1, acc2, ERC1400):  #  Déclaration des utilisateurs à ERC1400
+def test_register_holders(acc1, acc2, acc3, acc4, ERC20FixedSupply, ERC1400):  #  Déclaration des utilisateurs à ERC1400
     ERC1400.registerAccount({'from':acc1})
     ERC1400.registerAccount({'from':acc2})
     ERC1400.registerAccount({'from':acc3})
