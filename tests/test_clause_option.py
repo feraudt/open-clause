@@ -39,9 +39,11 @@ def test_address(clauseOption):
 def test_register_holders(acc1, acc2, ERC1400):  #  Déclaration des utilisateurs à ERC1400
 	ERC1400.registerAccount({'from':acc1})
 	ERC1400.registerAccount({'from':acc2})
+	assert ERC1400.holders(acc1)[1] == 0 and ERC1400.holders(acc2)[1] == 0
+
+def test_init_allowance(acc1, acc2, ERC1400):
 	ERC20FixedSupply.approve(ERC1400.address, 0, {'from':acc1})
 	ERC20FixedSupply.approve(ERC1400.address, 0, {'from':acc2})
-	assert ERC1400.holders(acc1)[1] == 0 and ERC1400.holders(acc2)[1] == 0
 	assert ERC20FixedSupply.allowance(acc1, ERC1400.address) == 0 and ERC20FixedSupply.allowance(acc2, ERC1400.address) == 0
 
 def test_register_escrow(acc0, ERC1400, clauseOption):  # Déclaration du séquestre à ERC1400
@@ -112,23 +114,3 @@ def test_deny(ERC20FixedSupply, ERC1400, clauseOption, acc1, acc2):  # Option po
 	clauseOption.recipientDeny(1234, {'from':acc1})
 	assert ERC1400.partitions(1234)[3] == 0
 	assert ERC20FixedSupply.balanceOf(acc1) == b1 - 1
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
