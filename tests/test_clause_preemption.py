@@ -90,7 +90,7 @@ def test_buy_part_erc1400(acc1, ERC1400, ERC20FixedSupply):  # Achat d'une part 
     assert ERC20FixedSupply.allowance(acc1, ERC1400.address) == a - 5
 
 def test_start_preemption(acc1, acc3, acc4, ERC1400, clausePreemption):  # Déclaration des bénéficiaires par Alice
-    ERC1400.approveEscrow(clausePreemption.address, 1234, 3, {'from':acc1})
+    ERC1400.approveEscrow(clausePreemption.address, 1234, {'from':acc1})
     clausePreemption.startPreemption(acc3, 10, {'from':acc1})
     p3 = clausePreemption.preemptions(acc1, 0)
     clausePreemption.startPreemption(acc4, 10, {'from':acc1})
@@ -122,14 +122,3 @@ def test_transfer(acc1, acc4, ERC20FixedSupply, ERC1400, clausePreemption):  # C
     assert ERC20FixedSupply.balanceOf(acc1) == b1 + 5
     assert ERC20FixedSupply.balanceOf(acc4) == b4 - 5
     assert ERC1400.partitions(1234)[0] == acc4.address
-
-
-
-
-
-
-
-
-
-
-
