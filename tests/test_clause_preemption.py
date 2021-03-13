@@ -41,12 +41,17 @@ def clausePreemption(acc0, ERC20FixedSupply, ERC1400, clausePreemption):
 def test_address(clausePreemption):
     print("clausePreemption.address = ", clausePreemption.address)
 
-def test_register_holders(acc1, acc2, acc3, acc4, ERC1400):  #  Déclaration des utilisateurs à ERC1400
+def test_register_holders(acc1, acc2, ERC1400):  #  Déclaration des utilisateurs à ERC1400
     ERC1400.registerAccount({'from':acc1})
     ERC1400.registerAccount({'from':acc2})
     ERC1400.registerAccount({'from':acc3})
     ERC1400.registerAccount({'from':acc4})
+    ERC20FixedSupply.approve(ERC1400.address, 0, {'from':acc1})
+    ERC20FixedSupply.approve(ERC1400.address, 0, {'from':acc2})
+    ERC20FixedSupply.approve(ERC1400.address, 0, {'from':acc3})
+    ERC20FixedSupply.approve(ERC1400.address, 0, {'from':acc4})
     assert ERC1400.holders(acc1)[1] == 0 and ERC1400.holders(acc2)[1] == 0 and ERC1400.holders(acc3)[1] == 0 and ERC1400.holders(acc4)[1] == 0
+    assert ERC20FixedSupply.allowance(acc1, ERC1400.address) == 0 and ERC20FixedSupply.allowance(acc2, ERC1400.address) == 0 and ERC20FixedSupply.allowance(acc3, ERC1400.address) == 0 and ERC20FixedSupply.allowance(acc4, ERC1400.address) == 0
 
 def test_register_escrow(acc0, ERC1400, clausePreemption):  # Déclaration du séquestre à ERC1400
     ERC1400.registerEscrow(clausePreemption.address, {'from':acc0})
@@ -65,7 +70,7 @@ def test_erc20_transfer(acc1, acc2, acc3, acc4, ERC20FixedSupply):  # Transfert 
 
 def test_allow_erc1400(acc1, ERC20FixedSupply, ERC1400):  # Autorisation pour ERC1400 de débiter Alice en ERC20
     a = ERC20FixedSupply.allowance(acc1, ERC1400.address)
-    ERC20FixedSupply.approve(ERC1400.address, 5, {'from':acc1})
+    ERC20FixedSupply.increaseAllowance(ERC1400.address, 5, {'from':acc1})
     assert ERC20FixedSupply.allowance(acc1, ERC1400.address) == a + 5
 
 def test_buy_part_erc1400(acc1, ERC1400, ERC20FixedSupply):  # Achat d'une part ERC1400 par Alice
@@ -110,8 +115,9 @@ def test_responses(acc3, acc4, clausePreemption):  # Accord ou refus des bénéf
 def test_transfer(acc1, acc4, ERC20FixedSupply, ERC1400, clausePreemption):  # Choix de l'acheteur par Alice et vente
     b1 = ERC20FixedSupply.balanceOf(acc1)
     b4 = ERC20FixedSupply.balanceOf(acc4)
-    ERC20FixedSupply.approve(clausePreemption.address, 2, {'from':acc4})
-    ERC20FixedSupply.approve(ERC1400.address, 3, {'from':acc4})
+    ERC20FixedSupply.approve(clausePreemption.address, 0, {'from':acc4})
+    ERC20FixedSupply.increaseAllowance(clausePreemption.address, 2, {'from':acc4})
+    ERC20FixedSupply.increaseAllowance(ERC1400.address, 3, {'from':acc4})
     clausePreemption.launchTransfer(acc4, 1234, {'from':acc1})
     assert ERC20FixedSupply.balanceOf(acc1) == b1 + 5
     assert ERC20FixedSupply.balanceOf(acc4) == b4 - 5

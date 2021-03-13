@@ -35,7 +35,10 @@ def test_address(clauseForward):
 def test_register_holders(acc1, acc2, ERC1400):  #  Déclaration des utilisateurs à ERC1400
     ERC1400.registerAccount({'from':acc1})
     ERC1400.registerAccount({'from':acc2})
+    ERC20FixedSupply.approve(ERC1400.address, 0, {'from':acc1})
+    ERC20FixedSupply.approve(ERC1400.address, 0, {'from':acc2})
     assert ERC1400.holders(acc1)[1] == 0 and ERC1400.holders(acc2)[1] == 0
+    assert ERC20FixedSupply.allowance(acc1, ERC1400.address) == 0 and ERC20FixedSupply.allowance(acc2, ERC1400.address) == 0
 
 def test_register_escrow(acc0, ERC1400, clauseForward):  # Déclaration du séquestre à ERC1400
     ERC1400.registerEscrow(clauseForward.address, {'from':acc0})
@@ -49,8 +52,8 @@ def test_erc20_transfer(acc1, acc2, ERC20FixedSupply):  # Transfert de tokens ER
     assert ERC20FixedSupply.balanceOf(acc1) == b1 + 20 and ERC20FixedSupply.balanceOf(acc2) == b2 + 20
 
 def test_allow_erc1400(acc1, ERC20FixedSupply, ERC1400):  # Autorisation pour ERC1400 de débiter Alice en ERC20
-    a = ERC20FixedSupply.allowance(acc1, ERC1400.address)
-    ERC20FixedSupply.approve(ERC1400.address, 5, {'from':acc1})
+    a = RC20FixedSupply.allowance(acc1, ERC1400.address)
+    ERC20FixedSupply.increaseAllowance(ERC1400.address, 5, {'from':acc1})
     assert ERC20FixedSupply.allowance(acc1, ERC1400.address) == a + 5
 
 def test_buy_part_erc1400(acc1, ERC1400, ERC20FixedSupply):  # Achat d'une part ERC1400 par Alice
@@ -69,12 +72,13 @@ def test_buy_part_erc1400(acc1, ERC1400, ERC20FixedSupply):  # Achat d'une part 
     assert ERC20FixedSupply.allowance(acc1, ERC1400.address) == a - 3
 
 def test_allow_sale(acc1, acc2, ERC20FixedSupply, ERC1400, clauseForward):  # Positionnement des autorisations requises
-    af = ERC20FixedSupply.allowance(acc2, clauseForward.address)
     a1400 = ERC20FixedSupply.allowance(acc2, ERC1400)
     ERC1400.approveEscrow(clauseForward.address, 1234, 3, {'from':acc1})
-    ERC20FixedSupply.approve(clauseForward.address, 2, {'from':acc2})
-    ERC20FixedSupply.approve(ERC1400.address, 3, {'from':acc2})
-    assert ERC20FixedSupply.allowance(acc2, clauseForward.address) == af + 2
+    ERC20FixedSupply.approve(clauseForward.address, 0, {'from':acc1})
+    ERC20FixedSupply.approve(clauseForward.address, 0, {'from':acc2})
+    ERC20FixedSupply.increaseAllowance(clauseForward.address, 2, {'from':acc2})
+    ERC20FixedSupply.increaseAllowance(ERC1400.address, 3, {'from':acc2})
+    assert ERC20FixedSupply.allowance(acc2, clauseForward.address) == 2
     assert ERC20FixedSupply.allowance(acc2, ERC1400.address) == a1400 + 3
 
 def test_start_sale(acc1, acc2, clauseForward):  # Lancement de l'avis de vente par Alice pour Bob

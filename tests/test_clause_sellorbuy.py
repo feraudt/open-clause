@@ -48,10 +48,11 @@ def test_erc20_transfer(acc1, acc2, ERC20FixedSupply):  # Transfert de tokens ER
     assert ERC20FixedSupply.balanceOf(acc1) == b1 + 50 and ERC20FixedSupply.balanceOf(acc2) == b2 + 50
 
 def test_allow_erc1400(acc1, ERC20FixedSupply, ERC1400):  # Autorisation pour ERC1400 de débiter Alice et Bob en tokens ERC20
-    a = ERC20FixedSupply.allowance(acc1, ERC1400.address)
-    ERC20FixedSupply.approve(ERC1400.address, 5, {'from':acc1})
-    ERC20FixedSupply.approve(ERC1400.address, 5, {'from':acc2})
-    assert ERC20FixedSupply.allowance(acc1, ERC1400.address) == a + 5
+    ERC20FixedSupply.approve(ERC1400.address, 0, {'from':acc1})
+    ERC20FixedSupply.approve(ERC1400.address, 0, {'from':acc2})
+    ERC20FixedSupply.increaseAllowance(ERC1400.address, 5, {'from':acc1})
+    ERC20FixedSupply.increaseAllowance(ERC1400.address, 5, {'from':acc2})
+    assert ERC20FixedSupply.allowance(acc1, ERC1400.address) == 5
 
 def test_buy_part_erc1400(acc1, ERC1400, ERC20FixedSupply):  # Achat de parts ERC1400 par Alice et Bob
     a = ERC20FixedSupply.allowance(acc1, ERC1400.address)
@@ -73,7 +74,8 @@ def test_buy_part_erc1400(acc1, ERC1400, ERC20FixedSupply):  # Achat de parts ER
 def test_allow_sellorbuy(acc1, clauseSellorbuy, ERC1400):
     ERC1400.approveEscrow(clauseSellorbuy.address, 1234, 2, {'from':acc1})
     ERC1400.approveEscrow(clauseSellorbuy.address, 4321, 3, {'from':acc1})
-    ERC20FixedSupply.approve(clauseSellorbuy.address, 1, {'from':acc1})
+    ERC20FixedSupply.approve(clauseSellorbuy.address, 0, {'from':acc1})
+    ERC20FixedSupply.increaseAllowance(clauseSellorbuy.address, 1, {'from':acc1})
 
 
 
