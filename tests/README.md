@@ -14,7 +14,7 @@ pour lancer pytest avec l'option -s (affichage de print()) :
 
 	Launching 'ganache-cli --port 8545 --gasLimit 12000000 --accounts 10 --hardfork istanbul --mnemonic brownie'...
 
-	tests/test_clause_forward.py::test_address <span style="color:yellow">some RUNNING text</span>
+	tests/test_clause_forward.py::test_address RUNNING
 	account[0] :
 	Enter the password to unlock this account:
 	clauseForward.address =  0x1BbDe47982ac6dEB4E752a4DFF32Cb70DF8e5C18
