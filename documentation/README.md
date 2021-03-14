@@ -31,7 +31,7 @@ Nous avons fait le choix d'implémenter le séquestre d'une partition sous la fo
 
 ## diagramme de classes
 
-![Image](./sources/class_ss_tokens.png)
+![Image](./sources/class_sc_tokens.png)
 
 ## scénarios
 

@@ -2,6 +2,8 @@ pour lancer pytest avec l'option -s (affichage de print()) :
 
 	$ brownie test -s
 
+Le résultat attendu des tests est le suivant :
+
 	Brownie v1.11.10 - Python development framework for Ethereum
 
 	============================================================ test session starts ============================================================
