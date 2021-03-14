@@ -29,12 +29,12 @@ Nous avons fait le choix d'implémenter le séquestre d'une partition sous la fo
 
 ![Image](./sources/lib_smart_contract.png)
 
+## diagramme de classes
+
+![Image](./sources/class_ss_tokens.png)
+
 ## scénarios
 
 ### clause d'option
 
 ![Image](./sources/sequence_clause_option_commente.png)
-
-## tests
-
-   $ brownie test -s
