@@ -4,6 +4,6 @@ Les scripts *use_clause_xxx.py* sont disponibles pour tester les smart contracts
 
 Les commandes des scripts s'exécutent dans la console, en lançant :
 
-  $ brownie console
+	$ brownie console
 
 Puis en recopiant successivement chaque instruction.
