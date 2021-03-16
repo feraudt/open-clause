@@ -1,4 +1,4 @@
-# Exécution des scénarios dans la console
+## Exécution des scénarios dans la console
 
 Les scripts s'exécutent dans la console en lançant la commande :
 

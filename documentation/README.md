@@ -36,10 +36,6 @@ Par convention, le développeur agit depuis le compte de portefeuille "account[0
 
 ![Image](./sources/lib_smart_contract.png)
 
-## diagramme de classes
-
-![Image](./sources/class_sc_tokens.png)
-
 ## scénarios
 
 ### clause d'option
