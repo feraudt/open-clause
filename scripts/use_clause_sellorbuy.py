@@ -164,7 +164,7 @@ ERC1400[0].confined(1234)
 ### out : ("0x1BbDe47982ac6dEB4E752a4DFF32Cb70DF8e5C18", 1611089836, 2, "0xF800DeBE778aA16295AEF005db9c85aD4293DfA0")
 
 # -> dans la durée des deux heures, Bob accepte la vente de ses partitions
-# Alice doit avoir positionner les autorisations avant de lancer l'avis de vente
+# Alice doit avoir positionné les autorisations avant de lancer l'avis de vente
 ERC20FixedSupply[0].allowance(acc1, clauseSellorbuy[0].address)
 ERC20FixedSupply[0].allowance(acc1, ERC1400[0].address)
 ERC1400[0]._allowanceEscrow(acc1, clauseSellorbuy[0].address, 1234)
