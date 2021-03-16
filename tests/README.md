@@ -1,6 +1,9 @@
-pour lancer pytest avec l'option -s (affichage de print()) :
+## Lancement des tests
+
+Pour lancer pytest avec l'option -s (affichage de print()) :
 
 	$ brownie test -s
+
 
 Le résultat attendu des tests est le suivant :
 
