@@ -136,6 +136,8 @@ def test_controller(acc1, acc2, acc9, clauseSellorbuy, ERC1400, ERC20FixedSupply
 
     ERC20FixedSupply.increaseAllowance(clauseSellorbuy.address, 2, {'from':acc1})
     ERC20FixedSupply.increaseAllowance(ERC1400.address, 20, {'from':acc1})
+    ERC1400.approveEscrow(clauseSellorbuy.address, 2020, {'from':acc1})
+
     clauseSellorbuy.startSellorbuy(acc2, 22, 10, {'from':acc1})
     clauseSellorbuy.controllerRemove(acc2, {'from':acc9})
 
@@ -143,20 +145,11 @@ def test_controller(acc1, acc2, acc9, clauseSellorbuy, ERC1400, ERC20FixedSupply
     b2 = ERC20FixedSupply.balanceOf(acc2)
     ERC20FixedSupply.increaseAllowance(clauseSellorbuy.address, 2, {'from':acc1})
     ERC20FixedSupply.increaseAllowance(ERC1400.address, 20, {'from':acc1})
+    ERC1400.approveEscrow(clauseSellorbuy.address, 2020, {'from':acc1})
+
     clauseSellorbuy.startSellorbuy(acc2, 22, 1, {'from':acc1})
     time.sleep(61)
+    # in case of litige, is the transfer approved ?
     clauseSellorbuy.controllerForce(acc2, {'from':acc9})
     assert ERC20FixedSupply.balanceOf(acc1) == b1 + 22 and ERC20FixedSupply.balanceOf(acc2) == b2 - 22
     assert ERC1400.partitions(5555)[0] == acc1.address
-
-
-
-
-
-
-
-
-
-
-
-

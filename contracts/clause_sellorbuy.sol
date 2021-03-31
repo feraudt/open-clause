@@ -196,7 +196,7 @@ contract clauseSellorbuy {
 
 		// Transfer des partitions de offerer vers msg.sender
 		for(i=0; i<nbPartition; i++) {
-			require(tokenStock.allowanceEscrow(offerer, address(this), uidList[i]) == true);
+			//require(tokenStock.allowanceEscrow(offerer, address(this), uidList[i]) == true);
 			tokenStock.escrowExplicitTransfer(offerer, msg.sender, tokenStock.getPartitionAmount(uidList[i]), uidList[i]);
 		}
 

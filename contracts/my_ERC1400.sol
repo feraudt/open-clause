@@ -374,7 +374,7 @@ contract ERC1400 {
     require(partitions[partitionUid].owner == recipient, "le recipient est le propriétaire de la partition");
 		//require(partitions[partitionUid].status == partitionStates.STATUS_CONFINED, "la partition doit être confinée");
 		require(holders[msg.sender].status == holderStates.STATUS_ESCROW, "la transaction doit être émise depuis un compte de séquestre");
-    require(_allowanceEscrow[recipient][msg.sender][partitionUid] == true, "le contract Escrow doit être autorisé à modifier le status de la partition");
+    //require(_allowanceEscrow[recipient][msg.sender][partitionUid] == true, "le contract Escrow doit être autorisé à modifier le status de la partition");
 
 		partitions[partitionUid].status = partitionStates.STATUS_ACTIVE;
 		if(confined[partitionUid].expirationDate > now) {
