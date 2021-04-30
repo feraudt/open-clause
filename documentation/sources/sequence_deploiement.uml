@@ -1,0 +1,82 @@
+@startuml
+
+title Sequence diagram - Deployment
+
+actor developer
+actor holder_Alice
+actor holder_Bob
+collections blockchain
+
+== Deployment of the smart contracts ==
+
+group from developper
+developer -> developer : unlock account
+activate developer
+developer -> blockchain : deploy smart contract ERC20 "token payment"
+developer -> blockchain : deploy smart contract ERC1400 "token partitions"
+note right
+dependencies : ERC20
+Can be controlable or not
+end note
+developer -> blockchain : deploy smart contract clause_X
+note right
+dependencies : ERC20, ERC1400
+end note
+deactivate developer
+end
+
+== Register the roles on smart contract ERC1400 ==
+
+group registration Alice
+
+holder_Alice -> holder_Alice : unlock account
+holder_Alice -> blockchain : register Alice as ERC1400 holder
+end
+
+group registration Bob
+
+holder_Bob -> holder_Bob : unlock account
+holder_Bob -> blockchain : register Bob as ERC1400 holder
+end
+
+developer -> blockchain : register clause_X as ERC1400 escrow
+
+== Acquisition of partitions ==
+
+developer --> blockchain : transfer ERC20 tokens to the holders (who supposedly bought them)
+
+group set up the partitions
+
+loop for as many partitions as Alice wants
+
+holder_Alice -> blockchain : allow ERC1400 to debit n ERC20 tokens
+activate blockchain
+note right
+Checks Alice solvability
+end note
+holder_Alice -> blockchain : buy a partition P for n tokens
+note right
+ERC1400 charges Alice n ERC20 tokens
+creation of ERC1400 partition P
+end note
+deactivate blockchain
+end
+
+loop for as many partitions as Bob wants
+
+holder_Bob -> blockchain : allow ERC1400 to debit n ERC20 tokens
+activate blockchain
+note right
+Checks Bob solvability
+end note
+holder_Bob -> blockchain : buy a partition P for n tokens
+note right
+ERC1400 charges Bob n ERC20 tokens
+creation of ERC1400 partition P
+end note
+deactivate blockchain
+end
+end
+
+
+@enduml

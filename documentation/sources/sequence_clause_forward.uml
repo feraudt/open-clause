@@ -1,0 +1,48 @@
+@startuml
+
+hide footbox
+
+title Sequence diagram - Clause Option
+
+actor developer
+actor holder_Alice
+actor holder_Bob
+collections blockchain
+
+== Deployment, holders registration & acquisition of partitions ==
+
+...See **Sequence diagram - Deployment** above...
+
+== Clause Forward sale ==
+
+group Sale set up : owner Alice, recipient Bob, partition P \nexercise price e > n, sale price x, duration d
+
+holder_Bob -> blockchain : allow clause_forward to debit x ERC20 tokens
+holder_Bob -> blockchain : allow ERC1400 to debit e ERC20 tokens
+holder_Alice -> blockchain : allow clause_forward to confine partition P
+
+holder_Alice -> blockchain : initiate sale of P for Bob after d
+activate blockchain
+blockchain -> blockchain : start sale timer 
+deactivate blockchain
+note left
+clause_forward charges Bob x tokens
+clause_forward confines P for a duration d
+P is still Alice's property (frozen)
+end note
+end
+
+...Wait for //d//  to expire...
+
+group Sale execution
+
+holder_Bob -> blockchain : confirm sale
+activate blockchain
+blockchain -> blockchain : clause_forward transfers P \nfrom Alice to Bob
+deactivate blockchain
+note left
+ERC1400 transfers e ERC20 tokens from Bob to Alice
+end note
+end
+
+@enduml

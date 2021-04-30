@@ -1,0 +1,68 @@
+@startuml
+
+hide footbox
+
+title Sequence diagram - Clause Option
+
+actor developer
+actor holder_Alice
+actor holder_Bob
+collections blockchain
+
+== Deployment, holders registration & acquisition of partitions ==
+
+...See **Sequence diagram - Deployment** above...
+
+== Clause Option ==
+
+group Option set up : owner Alice, recipient Bob, partition P \nexercise price e > n, option price x, duration d
+
+holder_Bob -> blockchain : allow clause_option to debit x ERC20 tokens
+holder_Alice -> blockchain : allow clause_option to confine partition P
+
+holder_Alice -> blockchain : start option on P for Bob
+activate blockchain
+blockchain -> blockchain : start option 
+deactivate blockchain
+note left
+clause_option charges Bob x tokens
+clause_option confines P for a duration d
+P is still Alice's property (frozen)
+end note
+end
+
+group case 1 : Bob accepts in time
+
+holder_Bob -> blockchain : allow ERC1400 to debit e ERC20 tokens
+holder_Bob -> blockchain : accept offer for P
+activate blockchain
+blockchain -> blockchain : clause_option transfers P \nfrom Alice to Bob
+deactivate blockchain
+note left
+ERC1400 transfers e ERC20 tokens from Bob to Alice
+end note
+end
+
+group case 2 : Bob denies in time
+
+holder_Bob -> blockchain : deny offer for P
+activate blockchain
+blockchain -> blockchain : stop option 
+deactivate blockchain
+note left
+clause_option deconfines P
+end note
+end
+
+group case 3 : Option runs out of time
+
+activate blockchain
+blockchain -> blockchain : stop option 
+deactivate blockchain
+note left
+clause_option deconfines P
+similar to denial
+end note
+end
+
+@enduml

@@ -1,73 +1,145 @@
-# open-clausier
+<div style="text-align: justify">
 
-## présentation des clauses
+# Open clauses
 
-### clause à terme
+Dans le cadre de ce projet, différentes clauses juridiques implémentées à l'aide de smart contracts sur la blockchain *Ethereum* sont soumises à une série de tests fonctionnels dans le but de s'assurer du bon fonctionnement de ces clauses en interraction les unes avec les autres.
 
-### clause de préemption
+Pour cette phase de test, la blockchain *Ethereum* est simulée par le module *python* open source *[ganache-cli](https://github.com/trufflesuite/ganache-cli)*.
 
-### clause d'exclusion
+L'environnement de compilation, d'exécution et de test est géré par le module *python* open source *[brownie](https://github.com/eth-brownie/brownie)*.
 
-### clause d'option
+## Présentation des clauses
 
-La clause d'option implique deux détenteurs de partitions, le prometteur et le bénéficiaire. Lorsqu'Alice (prometteuse) concède à Bob (bénéficiaire) un droit d'option sur l'une de ses partitions, elle accepte de "confiner" (geler) sa partition pendant un certain temps, la durée de l'option, pendant lequel Bob est invité à se positionner quant à l'acquisition de la partition d'Alice. Le droit d'option a un coût, en supplément du montant des partitions pouvant être transférées à Bob s'il décide d'acheter. Au delà de la durée de l'option, si Bob ne s'est pas prononcé, la partition est "déconfinée" et Alice peut en disposer à sa guise.
+Avant d'entrer dans la partie technique du sujet, le fonctionnement et le cas d'usage des clauses qui vont être testées sont succintement preésentés ci-dessous.
 
-### clause sell or buy
+### Clause d'option
 
-## hypothèses de développement
+La clause d'option implique deux acteurs, le détenteur de la partition(Alice) et le bénéficiaire (Bob). Lorsqu'Alice accorde à Bob un droit d'option sur l'une de ses partitions, elle accepte de geler sa partition pendant un certain temps, la durée de l'option, pendant lequel Bob est invité à se positionner quant à l'acquisition de la partition d'Alice. Le droit d'option a un coût, en supplément du montant des partitions pouvant être transférées à Bob s'il décide d'acheter. Au delà de la durée de l'option, si Bob ne s'est pas prononcé, la partition est dégelée et Alice peut en disposer à sa guise.
 
-Aucun token n'est créé. Les tokens sont gérés par le smart contract ERC20, accessible à tous les utilisateurs.
-Le smart contract ERC1400 gère les actions (partitions) pour un groupe d'utilisateurs enregistrés (autorisés).
-Les mouvements des token sont effectués sur le smart contract ERC20.
-Les transfert, acquisition, vente, confinement de partitions sont effectués sur le smart contract ERC1400.
+### Clause de vente à terme
 
-Pour mettre en oeuvre les clauses sous forme de smart contracts et permettre leur exécution automatique, un groupe d'utilisateurs doit être enregistré sur un smart contract ERC1400 représentant les actions de leur entreprise. Pour permettre l'acquisition d'actions, une méthode d'achat de partitions est implémentée. D'autres techniques d'acquisition de partitions pourront être mises en oeuvre selon les cas d'usage considérés.
+La clause de vente à terme implique deux acteurs, le détenteur de la partition et le bénéficiaire. Lorsqu'Alice accorde à Bob un droit de vente à terme sur l'une de ses partitions, elle accepte de geler sa partition pendant un certain temps, la durée avant le terme, durée après la quelle Bob est libre d'acheter la partition à Alice pour son prix d'exercice plus un surcoût fixé au moment de l'émission du droit de vente (typiquement en prévision d'une augmentation de la valeur de l'action). La partition est alors transférée d'Alice à Bob contre la somme prévue. Si Bob refuse de terminer la vente après le terme, Alice garde sa partition qui est dégélée ainsi que le surcoût promis par Bob.
 
-Les smart contracts codant l'exécution automatique des clauses sont enregistrés avec le rôle "d'escrow" sur le smart contract ERC1400. Les utilisateurs lui délèguent la possibilité d'agir sur une de leur partition dans le cadre des méthodes définies dans le smart contract et pour un temps déterminé.
+### Clause de préemption
 
-Nous avons fait le choix d'implémenter le séquestre d'une partition sous la forme d'un confinement. Cela présente l'avantage de conserver la partition sur le compte de son possesseur. En revanche, celui-ci ne peut pas agir dessus pendant la durée du confinement. C'est le smart contract "d'escrow" qui lève le séquestre, en déconfinant la partition lorsque les conditions de la clause sont réunies.
+### Clause sell or buy
+
+## Hypothèses de développement
+
+Aucun token n'est créé. Lors de la phase d'initialisation, les utilisateurs se voient créditer des tokens de paiement qui correspondraient à un investissement de leur part mais qui, dans notre cas, sont fictifs.
+
+Les tokens sont gérés par le smart contract *ERC20*, accessible à tous les utilisateurs.
+
+Le smart contract *ERC1400* gère les actions (partitions) pour un groupe d'utilisateurs enregistrés.
+
+Les mouvements des token sont effectués sur le smart contract *ERC20*.
+
+Les transferts, acquisitions, ventes, et gels de partitions sont effectués sur le smart contract *ERC1400*.
+
+Pour mettre en oeuvre les clauses sous forme de smart contracts et permettre leur exécution automatique, un groupe d'utilisateurs doit être enregistré sur un smart contract de partitions *ERC1400* représentant les actions de leur entreprise. Pour permettre l'acquisition d'actions, une méthode d'achat de partitions est implémentée. D'autres techniques d'acquisition de partitions pourront être mises en oeuvre selon les cas d'usage considérés.
+
+Les smart contracts qui codent l'exécution automatique des clauses sont enregistrés avec le rôle d'*escrow* sur le smart contract *ERC1400*. Les utilisateurs lui délèguent la possibilité d'agir sur une de leur partition dans le cadre des méthodes définies dans le smart contract et pour un temps déterminé.
+
+Nous avons fait le choix d'implémenter le séquestre d'une partition sous la forme d'un gel. Cela présente l'avantage de conserver la partition sur le compte de son possesseur. En revanche, celui-ci ne peut pas agir dessus pendant la durée du gel. C'est le smart contract d'*escrow* qui lève le séquestre, en dégelant la partition lorsque les conditions de la clause sont réunies.
 
 Les smart contracts sont déployés dans la blockchain une seule fois. Lorsqu'une clause est initiée, une transaction est envoyée vers la méthode permettant d'instancier la clause stipulant les parties prenantes, les partitions ciblées, les coûts et la durée.
 
-Par convention, le développeur agit depuis le compte de portefeuille "account[0]".
+Par convention, le développeur agit depuis le compte de portefeuille `account[0]`.
 
 
-## composants de la librairie
+## Composants de la librairie
 
-![Image](./sources/lib_smart_contract.png)
+La librairie de smart contract est composée :
+- D'un smart contract de tokens de paiement, *ERC20*
+- D'un smart contract de tokens de partitions, *ERC1400*, qui dépend du token de paiement
+- D'un smart contract par clause qui dépend des deux smart contracts de tokens prédents
 
-## scénarios
+Le diagramme suivant représente l'organisation de la librairie :
 
-### clause d'option
+![Composants](./sources/lib_smart_contract.png "Library components")
 
-Le scénario mis en oeuvre pour effectuer le test de la clause d'option comporte les étapes préliminaires suivantes :
+## Tests fonctionnels
 
-1) les smart contracts de tokens, de partitions et de la clause d'option sont déployés dans le ledger (la blockchain)
-2) chaque acteur acquière des tokens de paiement (ERC20)
-3) les membres de la société détenteurs de partitions s'enregistrent sur le smart contract ERC1400 gérant les partitions de leur entreprise
-4) chacun des membres acquière quelques partitions
-5) le smart contract de la clause d'option est enregistré comme "escrow" sur le smart contract ERC1400
+### Déploiement des smart contracts
 
-Il s'agit ensuite de lancer un droit d'option : Alice initie un droit d'option en faveur de Bob sur l'une de ses partition (de numéro 1234) pour une durée de deux jours. Le coût de l'option est de 1 token ERC20, et le coût de l'exercice est de 3 tokens, supérieur (ou égal) au montant de la partition de 2 tokens. Pour cela :
+Les scénarios mis en oeuvre pour effectuer les tests des différentes clauses comportent tous les étapes préliminaires suivantes :
 
-5) Bob positionne sur le smart contract de paiement (ERC20) son accord pour être débité d'un token par le smart contract de la clause d'option
-6) Alice positionne son accord sur le smart contract de partitions (ERC1400) pour l'autoriser à modifier le status de sa partition de numéro 1234
-7) Alice lance le droit d'option en faveur de Bob par le déclenchement d'une méthode du smart contract d'option. cela a pour effet de mettre sa partition de numéro 1234 en "confinement" pour la durée de l'option sur le smart contract ERC1400, et de débiter le compte de Bob de un token au profit d'Alice sur le smart contract de paiement (ERC20).
+1. Les comptes utilisateurs (généralement Alice et Bob) et developper sont déclarés et chargés depuis le simulateur *ganache-cli*.
+2. Les smart contracts de tokens (*ERC20*), de partitions (*ERC1400*) et de la clause à tester sont déployés dans la blockchain simulée par *ganache-cli*.
+3. Chaque acteur acquière des tokens de paiement *ERC20*.
+4. Les acteurs amenés à détenir des partitions s'enregistrent en tant que *holders* sur le smart contract de partition *ERC1400*.
+5. Le smart contract de la clause à tester est enregistré comme *escrow* par le smart contract de partition *ERC1400*.
+6. Les acteurs souhaitant investir dans des partitions positionnent les autorisations nécessaires au débit de tokens de paiement *ERC20* correspondant.
+7. Les acteurs enregistrés investissent dans les partitions souhaitées (dans notre cas les partitions utiles aux tests).
 
-Dans la durée de l'option, Bob accepte l'achat de la partition numéro 1234. Pour cela :
-8) Bob positionne son accord sur le smart contract de paiement (ERC20) autorisant le smart contract de partitions à débiter son compte du montant de l'exercice.
-9) Puis, il indique sa décision d'acquérir la partition de numéro 1234 sur le smart contract d'option. Cela a pour effet d'effectuer le transfert de la partition de numéro 1234 d'Alice vers Bob sur le smart contract ERC1400, cette partition étant automatiquement "déconfinée", et de transférer 3 tokens correspondant au prix de l'exercice du compte de Bob vers le compte d'Alice sur le smart contract de paiement ERC20.
+La séquence des opérations est illustrée par le diagramme suivant :
 
-Dans la suite, Alice lance un autre droit d'option en faveur de Bob sur sa partition de numéro 5678. La durée de l'option est de 5 jours, le coût de l'option est de un token et le montant de l'exercice de 3 tokens est égal au montant de la partition. Pour cela :
+![Deployment sequence](./sources/sequence_deploiement.png "Deployment sequence")
 
-10) Bob positionne sur le smart contract de paiement (ERC20) son accord pour être débité d'un token par le smart contract de la clause d'option
-11) Alice positionne son accord sur le smart contract de partitions (ERC1400) pour l'autoriser à modifier le status de sa partition de numéro 5678
-12) Alice lance le droit d'option en faveur de Bob par le déclenchement d'une méthode du smart contract d'option. Cela a pour effet de mettre sa partition de numéro 5678 en "confinement" pour la durée de l'option sur le smart contract ERC1400, et de débiter le compte de Bob de un token au profit d'Alice sur le smart contract de paiement (ERC20).
+Au cours de ce déroulement sont testées les différentes méthodes de ces smart contracts utiles au déploiement, à l'enregistrement des rôles, au positionnement d'autorisations et à l'achat de tokens. A partir de valeurs données, les tests vérifient que le comportement du système et l'état des variables concernées sont bien ceux attendus.
 
-Dans la durée de l'option, Bob refuse l'achat de la partition numéro 5678. Pour cela :
+### Clause d'option
 
-13) Il indique son refus sur le smart contract de la clause d'option, ce qui a pour effet de "déconfiner" la partition de numéro 5678 sur le compte d'Alice.
+Alice est détentrice d'une partition `P` sur laquelle Bob souhaite mettre une option pour l'acheter au prix d'exercice `e` supérieur à la valeur `n` de la partition, l'option à un coût `x` et est valable pour une durée `d`.
+
+#### Déclaration du droit d'option
+
+1. Bob autorise le smart contract *clause_option* à le débiter de `x` tokens de paiement *ERC20*.
+2. Alice autorise le smart contract *clause_option* à séquestrer sa partition `P`.
+3. Alice lance le droit d'option à destination de Bob, sa partition `P` est alors gelée pour la durée `d` de l'option et Bob est débité du coût `x` de l'option au profit d'Alice sur le smart contract de paiement *ERC20*. Alice est toujours propriétaire de la partition mais ne peut en disposer.
+
+#### Résolution de l'option
+
+##### Bob accepte dans le temps imparti
+
+Si Bob souhaite accepter l'offre d'Alice, il doit au préalable autoriser le smart contract de partitions *ERC1400* à le débiter du prix `e` de la partition en tokens de paiement *ERC20*.
+
+Il indique ensuite au smart contract *clause_option* sa décision d'acquérir la partition `P`, le tout avant que la durée `d` de l'option ne soit écoulée. La partition `P` est alors dégélée et transférée de Alice à Bob, Bob lui est débité du prix `e` de la partition en token de paiement *ERC20* au profit d'Alice.
+
+##### Bob refuse dans le temps imparti
+
+Si Bob ne souhaite pas accepter l'offre d'Alice, il indique simplement au smart contract *clause_option* son refus dans le temps imparti `d`, le droit d'option est alors levé et Alice reste propriétaire de la partition `P` qui est dégelée.
+
+##### L'option expire
+
+Si Bob reste indécis trop longtemps et n'indique pas son choix avant que la durée `d` de l'option ne soit écoulée, le droit d'option est levé et Alice peut à nouveau disposer de sa partition comme en cas de refus.
 
 La séquence des opérations est illustrée sur le diagramme suivant :
 
-![Image](./sources/sequence_clause_option_commente.png)
+![Clause option](./sources/sequence_clause_option.png "Option clause sequence")
+
+Au cours de ce déroulement, chaque cas de figure est testé afin de s'assurer que les smart contracts gèrent les différentes possibilités comme ils le doivent et que chaque étape intermédiaire fonctionne correctement.
+
+### Clause à terme
+
+Alice est détentrice d'une partition `P` sur que Bob souhaite acheter après une durée `d` au prix d'exercice `e` supérieur à la valeur `n` de la partition, avec un surcoût de `x` au terme.
+
+#### Déclaration du droit de vente
+
+1. Bob autorise le smart contract *clause_forward* à le débiter de `x` tokens de paiement *ERC20*.
+2. Alice autorise le smart contract *clause_forward* à séquestrer sa partition `P`.
+3. Alice lance le droit de vente à terme à destination de Bob, sa partition `P` est alors gelée pour la durée `d` et Bob est débité du surcoût `x` de la vente au profit d'Alice sur le smart contract de paiement *ERC20*. Alice est toujours propriétaire de la partition mais ne peut en disposer.
+
+#### Résolution de la vente
+
+Après écoulement de la durée prévue, Bob choisi de terminer ou non la vente.
+
+##### Bob accepte
+
+Si Bob souhaite toujours conclure la vente et acheter la partition `P`, il doit au préalable autoriser le smart contract *ERC1400* à le débiter de `e` tokens de paiement *ERC20*. Il indique ensuite au smart contract *clause_forward* sont intention de conclure la vente, la partition est alors transférée de Alice à Bob et dégelée, et Bob est débité de `e` tokens de paiement au profit d'Alice.
+
+##### Bob refuse
+
+Si Bob ne juge plus intéressant de conclure la vente une fois le terme dépassé, il peut annuler la vente. Il indique donc sa sécision au smart contract clause_forward. Alice peut alors disposer à nouveau de la partition `P` et Bob ne récupère pas le surcoût `x` versé à Alice.
+
+La séquence des opérations en cas de vente est illustrée sur le diagramme suivant :
+
+![Clause forward](./sources/sequence_clause_forward.png "Forward sale clause sequence")
+
+### Clause de préemption
+
+### Clause d'exclusion
+
+### Clause sell or buy
+
+</div>

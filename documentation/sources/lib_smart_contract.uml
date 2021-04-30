@@ -1,6 +1,6 @@
 @startuml
 
-title "Components diagram - Smart contracts & Tokens"
+title Components diagram - Smart contracts & Tokens
 
 package "payment_token" #LightBlue {
 [ERC20]
@@ -12,29 +12,15 @@ package "stock_token" #Chartreuse {
 
 [ERC1400] .down.> [ERC20]
 
-package "clause_option" #Gold {
+package "clauses" #Gold {
 [sc_clause_option]
-}
-
-package "clause_sell-or-buy" #Gold {
-[sc_clause_sellOrBuy]
-}
-
-package "clause_exclusion" #Gold {
-[sc_clause_exclusion]
-}
-
-package "clause_preemption" #Gold {
-[sc_clause_preemption]
-}
-
-package "clause_a_terme" #Gold {
 [sc_clause_a_terme]
+[sc_clause_preemption]
+[sc_clause_sellOrBuy]
 }
 
 [sc_clause_option] .down.> [ERC1400]
 [sc_clause_sellOrBuy] .down.-> [ERC1400]
-[sc_clause_exclusion] .down.-> [ERC1400]
 [sc_clause_preemption] .down.> [ERC1400]
 [sc_clause_a_terme] .down.> [ERC1400]
 
