@@ -14,13 +14,15 @@ Avant d'entrer dans la partie technique du sujet, le fonctionnement et le cas d'
 
 ### Clause d'option
 
-La clause d'option implique deux acteurs, le détenteur de la partition(Alice) et le bénéficiaire (Bob). Lorsqu'Alice accorde à Bob un droit d'option sur l'une de ses partitions, elle accepte de geler sa partition pendant un certain temps, la durée de l'option, pendant lequel Bob est invité à se positionner quant à l'acquisition de la partition d'Alice. Le droit d'option a un coût, en supplément du montant des partitions pouvant être transférées à Bob s'il décide d'acheter. Au delà de la durée de l'option, si Bob ne s'est pas prononcé, la partition est dégelée et Alice peut en disposer à sa guise.
+La clause d'option implique deux acteurs, le détenteur de la partition (Alice) et le bénéficiaire (Bob). Lorsqu'Alice accorde à Bob un droit d'option sur l'une de ses partitions, elle accepte de geler sa partition pendant un certain temps, la durée de l'option, pendant lequel Bob est invité à se positionner quant à l'acquisition de la partition d'Alice. Le droit d'option a un coût, en supplément du montant des partitions pouvant être transférées à Bob s'il décide d'acheter. Au delà de la durée de l'option, si Bob ne s'est pas prononcé, la partition est dégelée et Alice peut en disposer à sa guise.
 
 ### Clause de vente à terme
 
-La clause de vente à terme implique deux acteurs, le détenteur de la partition et le bénéficiaire. Lorsqu'Alice accorde à Bob un droit de vente à terme sur l'une de ses partitions, elle accepte de geler sa partition pendant un certain temps, la durée avant le terme, durée après la quelle Bob est libre d'acheter la partition à Alice pour son prix d'exercice plus un surcoût fixé au moment de l'émission du droit de vente (typiquement en prévision d'une augmentation de la valeur de l'action). La partition est alors transférée d'Alice à Bob contre la somme prévue. Si Bob refuse de terminer la vente après le terme, Alice garde sa partition qui est dégélée ainsi que le surcoût promis par Bob.
+La clause de vente à terme implique deux acteurs, le détenteur de la partition (Alice) et le bénéficiaire (Bob). Lorsqu'Alice accorde à Bob un droit de vente à terme sur l'une de ses partitions, elle accepte de geler sa partition pendant un certain temps, la durée avant le terme, durée après la quelle Bob est libre d'acheter la partition à Alice pour son prix d'exercice plus un surcoût fixé au moment de l'émission du droit de vente (typiquement en prévision d'une augmentation de la valeur de l'action). La partition est alors transférée d'Alice à Bob contre la somme prévue. Si Bob refuse de terminer la vente après le terme, Alice garde sa partition qui est dégélée ainsi que le surcoût promis par Bob.
 
 ### Clause de préemption
+
+La clause de préemption implique deux acteurs ou plus et prend réellement son sens à partir de trois acteurs, un détenteur d'une partition (Alice) souhaitant vendre son action et des acheteurs potentiels (ici Bob et Charles). La clause de préemption permet à Alice d'émettre un avis de vente à destination des acheteurs potentiels qu'elle souhaite pour une partition qu'elle possède (qui est alors gelée), les potentiels acheteurs peuvent ensuite indiquer leur volonté d'acheter ou non la partition au prix demandé dans le temps imparti fixé par Alice. Une fois leur réponse donnée, Alice choisit à sa discrétion l'acheteur à qui elle vend effectivement la partition, parmis ceux ayant donné une réponse positive. La partition est alors dégelée et tranférée à l'acheteur choisi contre la somme prévue en token de paiement *ERC20*.
 
 ### Clause sell or buy
 
@@ -56,7 +58,7 @@ La librairie de smart contract est composée :
 
 Le diagramme suivant représente l'organisation de la librairie :
 
-![Composants](./sources/lib_smart_contract.png "Library components")
+<div align="center"> <img src="./sources/lib_smart_contract.png"> </div>
 
 ## Tests fonctionnels
 
@@ -74,7 +76,7 @@ Les scénarios mis en oeuvre pour effectuer les tests des différentes clauses c
 
 La séquence des opérations est illustrée par le diagramme suivant :
 
-![Deployment sequence](./sources/sequence_deploiement.png "Deployment sequence")
+<div align="center"> <img src="./sources/sequence_deploiement.png"> </div>
 
 Au cours de ce déroulement sont testées les différentes méthodes de ces smart contracts utiles au déploiement, à l'enregistrement des rôles, au positionnement d'autorisations et à l'achat de tokens. A partir de valeurs données, les tests vérifient que le comportement du système et l'état des variables concernées sont bien ceux attendus.
 
@@ -106,13 +108,13 @@ Si Bob reste indécis trop longtemps et n'indique pas son choix avant que la dur
 
 La séquence des opérations est illustrée sur le diagramme suivant :
 
-![Clause option](./sources/sequence_clause_option.png "Option clause sequence")
+<div align="center"> <img src="./sources/sequence_clause_option.png"> </div>
 
 Au cours de ce déroulement, chaque cas de figure est testé afin de s'assurer que les smart contracts gèrent les différentes possibilités comme ils le doivent et que chaque étape intermédiaire fonctionne correctement.
 
 ### Clause à terme
 
-Alice est détentrice d'une partition `P` sur que Bob souhaite acheter après une durée `d` au prix d'exercice `e` supérieur à la valeur `n` de la partition, avec un surcoût de `x` au terme.
+Alice est détentrice d'une partition `P` que Bob souhaite acheter après une durée `d` au prix d'exercice `e` supérieur à la valeur `n` de la partition, avec un surcoût de `x` au terme.
 
 #### Déclaration du droit de vente
 
@@ -134,9 +136,37 @@ Si Bob ne juge plus intéressant de conclure la vente une fois le terme dépass�
 
 La séquence des opérations en cas de vente est illustrée sur le diagramme suivant :
 
-![Clause forward](./sources/sequence_clause_forward.png "Forward sale clause sequence")
+<div align="center"> <img src="./sources/sequence_clause_forward.png"> </div>
+
+Au cours de ce scénario sont testées les méthodes permettant l'émission du droit de vente et la vente de l'action elle-même conformément aux différentes valeurs spécifiées.
 
 ### Clause de préemption
+
+Alice est détentrice d'une partition `P` de valeur `n` qu'elle souhaite vendre à Bob ou Charles avec un surcoût de préemption `x` dans un délai `d`.
+
+#### Emission de l'avis de vente
+
+1. Alice autorise le smart contract *clause_preemption* à séquestrer sa partition `P`.
+2. Alice enregistre Bob et Charles en tant que destinataires potentiels des avis de vente qu'elle emettra pendant une durée `D`.
+3. Dans la période fixée `D`, Alice crée les avis de vente pour `P` valables pour la durée `d` à destination de Bob et Charles, avec un coût de préemption `x`. Sa partition est alors gelée.
+
+#### Réponses des destinataires
+
+Bob souhaite acheter la partition `P` mise en vente par Alice, pour cela il doit :
+
+1. Autoriser le smart contract *clause_preemption* à le débiter de `x` tokens de paiement *ERC20*.
+2. Autoriser le smart contract de partitions *ERC1400* à le débiter de `n` tokens de paiement.
+3. Informer le smart contract *clause_preemption* de sa volonté d'acheter `P` dans le temps imparti `d`.
+
+Charles lui n'est pas intéressé par l'avis de vente, il lui suffit donc d'informer le smart contract *clause_preemption* de sa décision ou simplement ingorer l'offre.
+
+#### Choix d'Alice et vente
+
+Lorsqu'au moins un destinataire de l'avis de vente s'est prononcé intéressé par l'achat de la partition `P`, Alice peut choisir parmis eux celui à qui elle souhaite effectivement vendre. Dans notre scénario seul Bob est intéressé par `P` au prix demandé, Alice informe donc le smart contract *clause_preemption* de sa décision de vendre `P` à Bob. La partition `P` est alors transférée d'Alice à Bob contre `n + x` tokens de paiement *ERC20*.
+
+<div align="center"> <img src="./sources/sequence_clause_preemption.png"> </div>
+
+Les tests exécutés aux différentes étapes de ce scénario permettent de s'assurer du bon déroulement de la vente avec du positionnement des acteurs par rapport à l'offre d'Alice.
 
 ### Clause d'exclusion
 

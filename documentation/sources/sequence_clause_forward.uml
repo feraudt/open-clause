@@ -2,9 +2,8 @@
 
 hide footbox
 
-title Sequence diagram - Clause Option
+title Sequence diagram - Clause Forward sale
 
-actor developer
 actor holder_Alice
 actor holder_Bob
 collections blockchain
@@ -23,12 +22,12 @@ holder_Alice -> blockchain : allow clause_forward to confine partition P
 
 holder_Alice -> blockchain : initiate sale of P for Bob after d
 activate blockchain
-blockchain -> blockchain : start sale timer 
+blockchain -> blockchain : clause_forward transfers x ERC20 tokens \nfrom Bob to Alice
+blockchain -> blockchain : start sale timer \nfreeze P
 deactivate blockchain
 note left
-clause_forward charges Bob x tokens
 clause_forward confines P for a duration d
-P is still Alice's property (frozen)
+P is still Alice's property 
 end note
 end
 

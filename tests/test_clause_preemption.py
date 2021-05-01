@@ -98,7 +98,7 @@ def test_start_preemption(acc1, acc3, acc4, ERC1400, clausePreemption):  # Décl
     assert p3[0] == acc1.address and p4[0] == acc1.address
     assert p3[1] == acc3.address and p4[1] == acc4.address
 
-def test_notice(acc1, acc3, acc4, clausePreemption):  # Notification aux bénéficiaires de l'avis de vente de la part d'Alice 1234
+def test_notice(acc1, acc3, acc4, clausePreemption):  # Notification aux bénéficiaires de l'avis de vente de la part d'Alice
     clausePreemption.launchNotice(acc3, 1234, 2, 5, {'from':acc1})
     clausePreemption.launchNotice(acc4, 1234, 2, 5, {'from':acc1})
     r3 = clausePreemption.responses(acc3, 1234)

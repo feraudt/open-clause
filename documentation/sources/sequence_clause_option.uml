@@ -4,7 +4,6 @@ hide footbox
 
 title Sequence diagram - Clause Option
 
-actor developer
 actor holder_Alice
 actor holder_Bob
 collections blockchain
@@ -22,12 +21,12 @@ holder_Alice -> blockchain : allow clause_option to confine partition P
 
 holder_Alice -> blockchain : start option on P for Bob
 activate blockchain
-blockchain -> blockchain : start option 
+blockchain -> blockchain : clause_option transfers x ERC20 tokens \nfrom Bob to Alice
+blockchain -> blockchain : start option \nfreeze P
 deactivate blockchain
 note left
-clause_option charges Bob x tokens
 clause_option confines P for a duration d
-P is still Alice's property (frozen)
+P is still Alice's property 
 end note
 end
 

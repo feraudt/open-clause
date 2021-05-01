@@ -1,0 +1,66 @@
+@startuml
+
+hide footbox
+
+title Sequence diagram - Clause Preemption
+
+actor holder_Alice
+actor holder_Bob
+actor holder_Charles
+collections blockchain
+
+== Deployment, holders registration & acquisition of partitions ==
+
+...See **Sequence diagram - Deployment** above...
+
+== Clause Preemption ==
+
+group Preemption set up : owner Alice, buyers Bob & Charles, partition P \nvalue n, preemption price x, notice duration d, preemption duration D
+
+holder_Alice -> blockchain : allow clause_preemption to confine partition P
+
+holder_Alice -> blockchain : start preemption for Bob & Charles
+activate blockchain
+blockchain -> blockchain : start preemption timer
+note left
+Bob & Charles are added as potential recipients
+for the incoming sales from Alice
+within a duration D
+end note
+deactivate blockchain
+holder_Alice -> blockchain : Alice sends sale notice to Bob & Charles
+note right
+clause_preemption checks preemption timer
+end note
+blockchain -> blockchain : start notice timer \nfreeze P
+note left
+clause_preemption confines P for a duration d
+P is still Alice's property 
+end note
+end
+
+group Responses \nBob accepts & Charles refuses
+
+holder_Bob -> blockchain : allow clause_preemption to debit x ERC20 tokens 
+holder_Bob -> blockchain : allow ERC1400 to debit n ERC20 tokens 
+holder_Bob -> blockchain : decide to buy
+note right
+clause_preemption checks notice timer
+end note
+holder_Charles -> blockchain : decide not to buy
+end
+
+group Sale \nAlice's only choice is to sell to Bob
+
+holder_Alice -> blockchain : initiate transfer of P to Bob
+activate blockchain
+blockchain -> blockchain : clause_preemption transfers x ERC20 tokens \nfrom Bob to Alice
+blockchain -> blockchain : clause_preemption transfers P \nfrom Alice to Bob
+deactivate blockchain
+note left
+ERC1400 transfers n ERC20 tokens from Bob to Alice
+unfreeze P
+end note
+end
+
+@enduml
