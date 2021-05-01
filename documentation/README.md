@@ -106,7 +106,7 @@ Si Bob ne souhaite pas accepter l'offre d'Alice, il indique simplement au smart 
 
 Si Bob reste indécis trop longtemps et n'indique pas son choix avant que la durée `d` de l'option ne soit écoulée, le droit d'option est levé et Alice peut à nouveau disposer de sa partition comme en cas de refus.
 
-La séquence des opérations est illustrée sur le diagramme suivant :
+La séquence des opérations est illustrée par le diagramme suivant :
 
 <div align="center"> <img src="./sources/sequence_clause_option.png"> </div>
 
@@ -134,7 +134,7 @@ Si Bob souhaite toujours conclure la vente et acheter la partition `P`, il doit 
 
 Si Bob ne juge plus intéressant de conclure la vente une fois le terme dépassé, il peut annuler la vente. Il indique donc sa sécision au smart contract clause_forward. Alice peut alors disposer à nouveau de la partition `P` et Bob ne récupère pas le surcoût `x` versé à Alice.
 
-La séquence des opérations en cas de vente est illustrée sur le diagramme suivant :
+La séquence des opérations en cas de vente est illustrée par le diagramme suivant :
 
 <div align="center"> <img src="./sources/sequence_clause_forward.png"> </div>
 
@@ -160,9 +160,11 @@ Bob souhaite acheter la partition `P` mise en vente par Alice, pour cela il doit
 
 Charles lui n'est pas intéressé par l'avis de vente, il lui suffit donc d'informer le smart contract *clause_preemption* de sa décision ou simplement ingorer l'offre.
 
-#### Choix d'Alice et vente
+#### Décision d'Alice & vente
 
 Lorsqu'au moins un destinataire de l'avis de vente s'est prononcé intéressé par l'achat de la partition `P`, Alice peut choisir parmis eux celui à qui elle souhaite effectivement vendre. Dans notre scénario seul Bob est intéressé par `P` au prix demandé, Alice informe donc le smart contract *clause_preemption* de sa décision de vendre `P` à Bob. La partition `P` est alors transférée d'Alice à Bob contre `n + x` tokens de paiement *ERC20*.
+
+La séquence des opérations est illustrée par le diagramme suivant :
 
 <div align="center"> <img src="./sources/sequence_clause_preemption.png"> </div>
 
