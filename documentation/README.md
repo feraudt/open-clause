@@ -210,6 +210,6 @@ Au cours de ce déroulement, chaque cas de figure est testé afin de s'assurer q
 
 ## Perspectives
 
-Cette batterie de tests fonctionnels est un outils efficace pour s'assurer que les scénarios typiques d'utilisation des différentes clauses de la librairie se déroulent correctement, elle gagnerait à être enrichie par des tests de sécurité. L'ajout aux différentes étapes de ces scénarios de tests vérifiant le bon fonctionnement des *requirements* permettrait d'assurer la robustesse des différentes méthodes des smart contracts d'un point de vue fonctionnel. 
+Cette batterie de tests fonctionnels est un outil efficace pour s'assurer que les scénarios typiques d'utilisation des différentes clauses de la librairie se déroulent correctement, elle gagnerait à être enrichie par des tests de sécurité. L'ajout aux différentes étapes de ces scénarios de tests vérifiant le bon fonctionnement des *requirements* permettrait d'assurer la robustesse des différentes méthodes des smart contracts d'un point de vue fonctionnel. 
 
 </div>
