@@ -26,6 +26,8 @@ La clause de préemption implique deux acteurs ou plus et prend réellement son 
 
 ### Clause sell or buy
 
+La clause sell or buy implique deux acteurs (toujours Alice et Bob), tous deux détenteurs de la même valeur d'actions, c'est à dire que les valeurs cumulées en tokens de paiement ERC20 des partitions *ERC1400* de chacun sont égales. La clause sell or buy est utile lorsqu'Alice et Bob ne peuvent plus continuer à partager la propriété des actions en question, Alice peut alors faire appel à cette clause pour émettre un avis d'achat ou vente portant sur la totalité de ses actions à destination de Bob, valable pour une durée donnée et au prix d'exercice de son choix supérieur à la valeur des partitions. Bob peut alors accepter l'offre et vendre à Alice la totalité de ses partitions au prix proposé, au contraire si Bob refuse l'offre ou s'abstient de répondre dans les délais il est contraint d'acheter la totalité des partitions d'Alice au prix initialement proposé par cette dernière.
+
 ## Hypothèses de développement
 
 Aucun token n'est créé. Lors de la phase d'initialisation, les utilisateurs se voient créditer des tokens de paiement qui correspondraient à un investissement de leur part mais qui, dans notre cas, sont fictifs.
@@ -78,7 +80,7 @@ La séquence des opérations est illustrée par le diagramme suivant :
 
 <div align="center"> <img src="./sources/sequence_deploiement.png"> </div>
 
-Au cours de ce déroulement sont testées les différentes méthodes de ces smart contracts utiles au déploiement, à l'enregistrement des rôles, au positionnement d'autorisations et à l'achat de tokens. A partir de valeurs données, les tests vérifient que le comportement du système et l'état des variables concernées sont bien ceux attendus.
+Au cours de ces phases d'initialisation sont testées les différentes méthodes de ces smart contracts utiles au déploiement, à l'enregistrement des rôles par les smart contracts, au positionnement d'autorisations et à l'achat et transfer de tokens. A partir de valeurs données, ces tests vérifient que le comportement du système et l'état des variables concernées sont bien ceux attendus.
 
 ### Clause d'option
 
@@ -170,8 +172,44 @@ La séquence des opérations est illustrée par le diagramme suivant :
 
 Les tests exécutés aux différentes étapes de ce scénario permettent de s'assurer du bon déroulement de la vente avec du positionnement des acteurs par rapport à l'offre d'Alice.
 
-### Clause d'exclusion
-
 ### Clause sell or buy
+
+Alice et Bob sont chacun détenteurs d'un ensemble de partitions de valeur totale `n`. Alice fait une proposition valable pour une durée `d` portant sur la totalité des partitions pour un surcoût `x` donc au prix d'exercice `n + x = e > n`.
+
+#### Emission de l'avis d'achat ou vente
+
+1. Alice autorise le smart contract *clause_sell_or_buy* à geler l'ensemble de ses partitions.
+2. Alice autorise le smart contract *clause_sell_or_buy* à la débiter de `x` tokens de paiement *ERC20*.
+3. Alice autorise le smart contract *ERC1400* à la débiter de `n` tokens de paiement.
+4. Alice lance l'avis de vente ou achat pour l'ensemble des partitions à destination de Bob au prix d'exercice `e` pour la durée `d`.
+
+#### Résolution de la vente
+
+Bob choisit d'accepter l'offre et vendre ou de refuser et acheter dans le temps imparti, ou bien il doit acheter.
+
+##### Bob accepte et vend
+
+1. Bob autorise le smart contract *clause_sell_or_buy* à geler l'ensemble de ses partitions.
+2. Bob informe le smart contract *clause_sell_or_buy* dans le délai `d` de sa volonté d'accepter l'offre d'Alice. Ses partitions sont alors transférées en totalité à Alice qui verse à Bob le montant de `e` tokens de paiement *ERC20*.
+
+##### Bob refuse et achète
+
+1. Bob autorise le smart contract *clause_sell_or_buy* à le débiter de `x` tokens de paiement *ERC20*.
+2. Bob autorise le smart contract *ERC1400* à le débiter de `n` tokens de paiement.
+3. Bob informe le smart contract *clause_sell_or_buy* dans le délai `d` de sa volonté de refuser l'offre d'Alice. La totalité des partitions d'Alice est alors transférée à Bob pour le prix d'exercice proposé `e` qui revient à Alice.
+
+##### Le délai est dépassé ou un litige entre les acteurs empèche la conclusion de la vente
+
+Dans ce cas une tierce partie virtuelle ou non, le *controller*, peut forcer la vente des actions de l'un ou l'autre des acteurs sans que ces derniers ai nécessairement donné leur autorisation aux smart contracts utilisés (décision judiciaire, etc).
+
+La séquence des opérations est illustrée par le diagramme suivant :
+
+<div align="center"> <img src="./sources/sequence_clause_sell_or_buy.png"> </div>
+
+Au cours de ce déroulement, chaque cas de figure est testé afin de s'assurer que les smart contracts gèrent les différentes possibilités comme ils le doivent et que chaque étape intermédiaire fonctionne correctement, de l'émission de l'avis d'achat ou vente au transfer de partitions et tokens de paiement.
+
+## Perspectives
+
+Cette batterie de tests fonctionnels est un outils efficace pour s'assurer que les scénarios typiques d'utilisation des différentes clauses de la librairie se déroulent correctement, elle gagnerait à être enrichie par des tests de sécurité. L'ajout aux différentes étapes de ces scénarios de tests vérifiant le bon fonctionnement des *requirements* permettrait d'assurer la robustesse des différentes méthodes des smart contracts d'un point de vue fonctionnel. 
 
 </div>

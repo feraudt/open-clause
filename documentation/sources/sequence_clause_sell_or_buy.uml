@@ -1,0 +1,75 @@
+@startuml
+
+hide footbox
+
+title Sequence diagram - Clause Sell or Buy
+
+actor controller
+actor holder_Alice
+actor holder_Bob
+collections blockchain
+
+== Deployment, holders registration & acquisition of partitions ==
+
+...See **Sequence diagram - Deployment** above...
+
+== Clause Sell or Buy ==
+
+group Bid notice set up : bidder Alice, co-shareholder Bob, \ntotal share value n, overcharge x, duration d
+
+holder_Alice -> blockchain : allow clause_sell_or_buy to freeze all her ERC1400 partitions
+holder_Alice -> blockchain : allow clause_sell_or_buy to debit x ERC20 tokens
+holder_Alice -> blockchain : allow ERC1400 to debit n ERC20 tokens
+
+holder_Alice -> blockchain : launch notice for Bob
+activate blockchain
+blockchain -> blockchain : start notice timer \nfreeze Alice's partitions
+deactivate blockchain
+note left
+the bid amount is e = n + x
+valid during d
+end note
+end
+
+group case 1 : Bob accepts in time and sells
+
+holder_Bob -> blockchain : allow clause_sell_or_buy to freeze all his partitions
+holder_Bob -> blockchain : accept Alice's bid e 
+activate blockchain
+blockchain -> blockchain : clause_sell_or_buy transfers \nall Bob's partitions to Alice 
+deactivate blockchain
+note left
+clause_sell_or_buy transfers e ERC20 tokens
+from Alice to Bob
+end note
+end
+
+group case 2 : Bob denies in time and buys
+
+holder_Bob -> blockchain : allow clause_sell_or_buy to debit x ERC20 tokens
+holder_Bob -> blockchain : allow ERC1400 to debit n ERC20 tokens
+holder_Bob -> blockchain : refuse Alice's bid
+activate blockchain
+blockchain -> blockchain : clause_sell_or_buy transfers \nall Alice's partitions to Bob 
+deactivate blockchain
+note left
+clause_sell_or_buy transfers e ERC20 tokens
+from Bob to Alice
+end note
+end
+
+group case 3 : Notice runs out of time or there is litigation
+
+controller -> blockchain : forces one of the holders to sell all one's partitions and the other one to buy
+activate blockchain
+blockchain -> blockchain : transfers the partitions \nand ERC20 tokens \nas ordered by the controller 
+deactivate blockchain
+note left
+For this possibility to be available
+clause_sell_or_buy must have been deployed as controlable
+The controller must be registered as such
+on smart contract ERC1400
+end note
+end
+
+@enduml
