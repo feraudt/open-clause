@@ -10,7 +10,7 @@ L'environnement de compilation, d'exécution et de test est géré par le module
 
 ## Présentation des clauses
 
-Avant d'entrer dans la partie technique du sujet, le fonctionnement et le cas d'usage des clauses qui vont être testées sont succintement preésentés ci-dessous.
+Avant d'entrer dans la partie technique du sujet, le fonctionnement et le cas d'usage des clauses qui vont être testées sont succintement présentés ci-dessous.
 
 ### Clause d'option
 
@@ -18,7 +18,7 @@ La clause d'option implique deux acteurs, le détenteur de la partition (Alice) 
 
 ### Clause de vente à terme
 
-La clause de vente à terme implique deux acteurs, le détenteur de la partition (Alice) et le bénéficiaire (Bob). Lorsqu'Alice accorde à Bob un droit de vente à terme sur l'une de ses partitions, elle accepte de geler sa partition pendant un certain temps, la durée avant le terme, durée après la quelle Bob est libre d'acheter la partition à Alice pour son prix d'exercice plus un surcoût fixé au moment de l'émission du droit de vente (typiquement en prévision d'une augmentation de la valeur de l'action). La partition est alors transférée d'Alice à Bob contre la somme prévue. Si Bob refuse de terminer la vente après le terme, Alice garde sa partition qui est dégélée ainsi que le surcoût promis par Bob.
+La clause de vente à terme implique deux acteurs, le détenteur de la partition (Alice) et le bénéficiaire (Bob). Lorsqu'Alice accorde à Bob un droit de vente à terme sur l'une de ses partitions, elle accepte de geler sa partition pendant un certain temps, la durée avant le terme, durée après laquelle Bob est libre d'acheter la partition à Alice pour son prix d'exercice plus un surcoût fixé au moment de l'émission du droit de vente (typiquement en prévision d'une augmentation de la valeur de l'action). La partition est alors transférée d'Alice à Bob contre la somme prévue. Si Bob refuse de terminer la vente après le terme, Alice garde sa partition qui est dégélée ainsi que le surcoût promis par Bob.
 
 ### Clause de préemption
 
@@ -30,13 +30,13 @@ La clause sell or buy implique deux acteurs (toujours Alice et Bob), tous deux d
 
 ## Hypothèses de développement
 
-Aucun token n'est créé. Lors de la phase d'initialisation, les utilisateurs se voient créditer des tokens de paiement qui correspondraient à un investissement de leur part mais qui, dans notre cas, sont fictifs.
+Aucun token n'est créé. Lors de la phase d'initialisation, les utilisateurs se voient crédités des tokens de paiement qui correspondraient à un investissement de leur part mais qui, dans notre cas, sont fictifs.
 
 Les tokens sont gérés par le smart contract *ERC20*, accessible à tous les utilisateurs.
 
 Le smart contract *ERC1400* gère les actions (partitions) pour un groupe d'utilisateurs enregistrés.
 
-Les mouvements des token sont effectués sur le smart contract *ERC20*.
+Les mouvements de token sont effectués sur le smart contract *ERC20*.
 
 Les transferts, acquisitions, ventes, et gels de partitions sont effectués sur le smart contract *ERC1400*.
 
@@ -68,11 +68,11 @@ Le diagramme suivant représente l'organisation de la librairie :
 
 Les scénarios mis en oeuvre pour effectuer les tests des différentes clauses comportent tous les étapes préliminaires suivantes :
 
-1. Les comptes utilisateurs (généralement Alice et Bob) et developper sont déclarés et chargés depuis le simulateur *ganache-cli*.
+1. Les comptes utilisateurs (généralement Alice et Bob) et développeur sont déclarés et chargés depuis le simulateur *ganache-cli*.
 2. Les smart contracts de tokens (*ERC20*), de partitions (*ERC1400*) et de la clause à tester sont déployés dans la blockchain simulée par *ganache-cli*.
 3. Chaque acteur acquière des tokens de paiement *ERC20*.
 4. Les acteurs amenés à détenir des partitions s'enregistrent en tant que *holders* sur le smart contract de partition *ERC1400*.
-5. Le smart contract de la clause à tester est enregistré comme *escrow* par le smart contract de partition *ERC1400*.
+5. Le smart contract de la clause à tester est enregistré comme *escrow* sur le smart contract de partition *ERC1400* par le développeur.
 6. Les acteurs souhaitant investir dans des partitions positionnent les autorisations nécessaires au débit de tokens de paiement *ERC20* correspondant.
 7. Les acteurs enregistrés investissent dans les partitions souhaitées (dans notre cas les partitions utiles aux tests).
 
@@ -80,7 +80,7 @@ La séquence des opérations est illustrée par le diagramme suivant :
 
 <div align="center"> <img src="./sources/sequence_deploiement.png"> </div>
 
-Au cours de ces phases d'initialisation sont testées les différentes méthodes de ces smart contracts utiles au déploiement, à l'enregistrement des rôles par les smart contracts, au positionnement d'autorisations et à l'achat et transfer de tokens. A partir de valeurs données, ces tests vérifient que le comportement du système et l'état des variables concernées sont bien ceux attendus.
+Au cours de ces phases d'initialisation sont testées les différentes méthodes de ces smart contracts utiles au déploiement, à l'enregistrement des rôles par les smart contracts, au positionnement d'autorisations et à l'achat et transfert de tokens. A partir de valeurs données, ces tests vérifient que le comportement du système et l'état des variables concernées sont bien ceux attendus.
 
 ### Clause d'option
 
@@ -134,7 +134,7 @@ Si Bob souhaite toujours conclure la vente et acheter la partition `P`, il doit 
 
 ##### Bob refuse
 
-Si Bob ne juge plus intéressant de conclure la vente une fois le terme dépassé, il peut annuler la vente. Il indique donc sa sécision au smart contract clause_forward. Alice peut alors disposer à nouveau de la partition `P` et Bob ne récupère pas le surcoût `x` versé à Alice.
+Si Bob ne juge plus intéressant de conclure la vente une fois le terme dépassé, il peut annuler la vente. Il indique donc sa décision au smart contract *clause_forward*. Alice peut alors disposer à nouveau de la partition `P` et Bob ne récupère pas le surcoût `x` versé à Alice.
 
 La séquence des opérations en cas de vente est illustrée par le diagramme suivant :
 
@@ -149,8 +149,8 @@ Alice est détentrice d'une partition `P` de valeur `n` qu'elle souhaite vendre 
 #### Emission de l'avis de vente
 
 1. Alice autorise le smart contract *clause_preemption* à séquestrer sa partition `P`.
-2. Alice enregistre Bob et Charles en tant que destinataires potentiels des avis de vente qu'elle emettra pendant une durée `D`.
-3. Dans la période fixée `D`, Alice crée les avis de vente pour `P` valables pour la durée `d` à destination de Bob et Charles, avec un coût de préemption `x`. Sa partition est alors gelée.
+2. Alice enregistre Bob et Charles en tant que destinataires potentiels des avis de vente qu'elle émettra pendant une durée `d`.
+3. Dans la période fixée `d`, Alice crée les avis de vente pour `P` valables pour la durée `d` à destination de Bob et Charles, avec un coût de préemption `x`. Sa partition est alors gelée.
 
 #### Réponses des destinataires
 
@@ -174,18 +174,18 @@ Les tests exécutés aux différentes étapes de ce scénario permettent de s'as
 
 ### Clause sell or buy
 
-Alice et Bob sont chacun détenteurs d'un ensemble de partitions de valeur totale `n`. Alice fait une proposition valable pour une durée `d` portant sur la totalité des partitions pour un surcoût `x` donc au prix d'exercice `n + x = e > n`.
+Alice et Bob sont chacun détenteur d'un ensemble de partitions de valeur totale `n`. Alice fait une proposition valable pour une durée `d` portant sur la totalité des partitions pour un surcoût `x` donc au prix d'exercice `n + x = e > n`.
 
 #### Emission de l'avis d'achat ou vente
 
 1. Alice autorise le smart contract *clause_sell_or_buy* à geler l'ensemble de ses partitions.
-2. Alice autorise le smart contract *clause_sell_or_buy* à la débiter de `x` tokens de paiement *ERC20*.
-3. Alice autorise le smart contract *ERC1400* à la débiter de `n` tokens de paiement.
+2. Alice autorise le smart contract *clause_sell_or_buy* à débiter son compte de `x` tokens de paiement *ERC20*.
+3. Alice autorise le smart contract *ERC1400* à débiter son compte de `n` tokens de paiement *ERC20*.
 4. Alice lance l'avis de vente ou achat pour l'ensemble des partitions à destination de Bob au prix d'exercice `e` pour la durée `d`.
 
 #### Résolution de la vente
 
-Bob choisit d'accepter l'offre et vendre ou de refuser et acheter dans le temps imparti, ou bien il doit acheter.
+Bob choisit dans le temps imparti, d'accepter l'offre et donc de vendre ses partitions, ou de refuser l'offre et donc d'acheter les partitions d'Alice. Au delà du temps imparti, il est contraint de vendre ses partitions à Alice.
 
 ##### Bob accepte et vend
 
@@ -196,7 +196,7 @@ Bob choisit d'accepter l'offre et vendre ou de refuser et acheter dans le temps 
 
 1. Bob autorise le smart contract *clause_sell_or_buy* à le débiter de `x` tokens de paiement *ERC20*.
 2. Bob autorise le smart contract *ERC1400* à le débiter de `n` tokens de paiement.
-3. Bob informe le smart contract *clause_sell_or_buy* dans le délai `d` de sa volonté de refuser l'offre d'Alice. La totalité des partitions d'Alice est alors transférée à Bob pour le prix d'exercice proposé `e` qui revient à Alice.
+3. Bob informe le smart contract *clause_sell_or_buy* dans le délai `d` de sa volonté de refuser l'offre d'Alice. La totalité des partitions d'Alice est alors transférée à Bob au prix d'exercice proposé `e`.
 
 ##### Le délai est dépassé ou un litige entre les acteurs empèche la conclusion de la vente
 
@@ -210,6 +210,6 @@ Au cours de ce déroulement, chaque cas de figure est testé afin de s'assurer q
 
 ## Perspectives
 
-Cette batterie de tests fonctionnels est un outil efficace pour s'assurer que les scénarios typiques d'utilisation des différentes clauses de la librairie se déroulent correctement, elle gagnerait à être enrichie par des tests de sécurité. L'ajout aux différentes étapes de ces scénarios de tests vérifiant le bon fonctionnement des *requirements* permettrait d'assurer la robustesse des différentes méthodes des smart contracts d'un point de vue fonctionnel. 
+Cette batterie de tests fonctionnels est un outil efficace pour s'assurer que les scénarios typiques d'utilisation des différentes clauses de la librairie se déroulent correctement, elle gagnerait à être enrichie par des tests de sécurité. L'ajout aux différentes étapes de ces scénarios de tests vérifiant le bon fonctionnement des *requirements* (pré-requis à l'exécution d'une fonction d'un smart contract) permettrait d'assurer la robustesse des différentes méthodes des smart contracts d'un point de vue fonctionnel.
 
 </div>
