@@ -208,6 +208,24 @@ La séquence des opérations est illustrée par le diagramme suivant :
 
 Au cours de ce déroulement, chaque cas de figure est testé afin de s'assurer que les smart contracts gèrent les différentes possibilités comme ils le doivent et que chaque étape intermédiaire fonctionne correctement, de l'émission de l'avis d'achat ou vente au transfer de partitions et tokens de paiement.
 
+### Exécution des tests
+
+Pour lancer l'exécution des tests présentés précédemment, il convient de se placer dans l'environnement *brownie* du projet depuis un terminal de commandes *python* et de lancer la commande suivante pour tester chacune des clauses :
+
+    >>> brownie test -s
+
+Ou pour tester une seule clause `X` en particulier :
+
+    >>> brownie test .\tests\test_clause_X.py -s
+
+Le module brownie se charge alors de lancer l'exécution des tests dans l'ordre, cette étape peut être identifiée par l'affichage des lignes suivantes :
+
+<div align="center"> <img src="./sources/test_session_starts-terminal_capture.png"> </div>
+
+Puis lorsque l'exécution est terminée, brownie fournie un rapport du déroulement des tests qui est clos par la ligne de synthèse suivante :
+
+<div align="center"> <img src="./sources/terminating-terminal_capture.png"> </div>
+
 ## Perspectives
 
 Cette batterie de tests fonctionnels est un outil efficace pour s'assurer que les scénarios typiques d'utilisation des différentes clauses de la librairie se déroulent correctement, elle gagnerait à être enrichie par des tests de sécurité. L'ajout aux différentes étapes de ces scénarios de tests vérifiant le bon fonctionnement des *requirements* (pré-requis à l'exécution d'une fonction d'un smart contract) permettrait d'assurer la robustesse des différentes méthodes des smart contracts d'un point de vue fonctionnel.
